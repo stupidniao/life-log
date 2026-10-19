@@ -1,0 +1,145 @@
+.page {
+  padding-top: 24rpx;
+}
+
+/* ---------- 头部 ---------- */
+.profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #2F7D6D, #4FA294);
+  color: #FFFFFF;
+  font-size: 40rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.profile-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2429;
+}
+
+.profile-sub {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: #9AA0A6;
+}
+
+/* ---------- 行式卡片 ---------- */
+.row-card {
+  padding: 4rpx 28rpx;
+}
+
+.row-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100rpx;
+}
+
+.row-label {
+  font-size: 28rpx;
+  color: #1F2429;
+}
+
+.row-label.is-danger {
+  color: #E4574C;
+}
+
+.row-arrow {
+  font-size: 24rpx;
+  color: #9AA0A6;
+}
+
+.row-right {
+  display: flex;
+  align-items: center;
+}
+
+.row-prefix {
+  font-size: 28rpx;
+  color: #8A9099;
+  margin-right: 8rpx;
+}
+
+.row-input {
+  width: 220rpx;
+  text-align: right;
+  font-size: 30rpx;
+  color: #1F2429;
+  height: 60rpx;
+  line-height: 60rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.ph {
+  color: #C4C8CC;
+}
+
+.row-hint {
+  display: block;
+  padding: 0 0 22rpx;
+  font-size: 21rpx;
+  color: #B6BBC1;
+  line-height: 1.6;
+}
+
+/* ---------- 模块行 ---------- */
+.type-row {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  border-bottom: 1rpx solid #F2F4F6;
+}
+
+.type-row:last-of-type {
+  border-bottom: none;
+}
+
+.type-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.type-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1F2429;
+}
+
+.type-remove {
+  font-size: 23rpx;
+  color: #9AA0A6;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: #F6F7F9;
+}
+
+/* ---------- 底部 ---------- */
+.foot-note {
+  margin-top: 40rpx;
+  text-align: center;
+  font-size: 21rpx;
+  color: #C4C8CC;
+}

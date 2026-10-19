@@ -1,0 +1,181 @@
+.page {
+  padding-top: 24rpx;
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
+}
+
+/* ---------- 类型切换 ---------- */
+.type-bar {
+  width: 100%;
+  white-space: nowrap;
+  margin-bottom: 28rpx;
+}
+
+.type-bar .chips {
+  padding: 4rpx 0;
+}
+
+.editing-tip {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #7C8A85;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 18rpx 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.editing-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+
+/* ---------- 表单 ---------- */
+.form {
+  padding: 8rpx 28rpx;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  min-height: 104rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #F2F4F6;
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  width: 160rpx;
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: #5A626B;
+}
+
+.req {
+  color: #E4574C;
+  margin-left: 4rpx;
+  font-size: 26rpx;
+}
+
+.field-control {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.field-control--split {
+  justify-content: space-between;
+}
+
+.input {
+  flex: 1;
+  text-align: right;
+  font-size: 30rpx;
+  color: #1F2429;
+  height: 64rpx;
+  line-height: 64rpx;
+}
+
+.input-num {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ph {
+  color: #C4C8CC;
+  font-weight: 400;
+}
+
+.unit {
+  margin-left: 12rpx;
+  font-size: 26rpx;
+  color: #9AA0A6;
+  flex-shrink: 0;
+}
+
+.picker-wrap {
+  flex: 1;
+}
+
+.picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 30rpx;
+  color: #1F2429;
+  height: 64rpx;
+}
+
+.field-control--split .picker-value {
+  justify-content: flex-start;
+  font-size: 28rpx;
+  color: #1F2429;
+}
+
+.arrow {
+  margin-left: 10rpx;
+  color: #C4C8CC;
+  font-size: 30rpx;
+}
+
+/* ---------- 提示 ---------- */
+.hint {
+  margin-top: 24rpx;
+  padding: 0 8rpx;
+  font-size: 22rpx;
+  color: #B6BBC1;
+  line-height: 1.6;
+}
+
+/* ---------- 底部按钮 ---------- */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding: 20rpx 28rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1rpx solid #EDEFF2;
+  z-index: 30;
+}
+
+.btn + .btn {
+  margin-left: 20rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 20rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+}
+
+.btn-primary {
+  background: #2F7D6D;
+  color: #FFFFFF;
+}
+
+.btn-primary[disabled] {
+  background: #A9C9C1;
+  color: #FFFFFF;
+}
+
+.btn-ghost {
+  flex: 0 0 200rpx;
+  background: #FFFFFF;
+  color: #E4574C;
+  border: 1rpx solid #F2D6D3;
+}

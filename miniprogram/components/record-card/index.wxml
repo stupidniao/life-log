@@ -1,0 +1,20 @@
+<view
+  wx:if="{{record}}"
+  class="rc"
+  bindtap="onTap"
+  bindlongpress="onLongPress"
+  hover-class="rc-hover"
+  hover-stay-time="60"
+>
+  <view class="rc-icon" style="background:{{record.soft}};color:{{record.color}}">{{record.icon}}</view>
+
+  <view class="rc-main">
+    <view class="rc-title">{{record.title}}</view>
+    <view class="rc-sub" wx:if="{{record.sub}}">{{record.sub}}</view>
+  </view>
+
+  <view class="rc-right">
+    <view class="rc-value" style="color:{{record.type === 'expense' ? '#1F2429' : record.color}}">{{record.valueText}}</view>
+    <view class="rc-time" wx:if="{{showTime}}">{{record.time}}</view>
+  </view>
+</view>

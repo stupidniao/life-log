@@ -1,0 +1,81 @@
+<view class="page">
+
+  <!-- 顶部概览 -->
+  <view class="hero">
+    <view class="hero-row">
+      <text class="hero-date">{{dateText}}</text>
+      <text class="hero-badge">{{todayCount}} 条</text>
+    </view>
+    <text class="hero-greeting">{{greeting}}</text>
+
+    <view class="hero-money">
+      <view class="hero-money-main">
+        <text class="hero-label">本月支出</text>
+        <text class="hero-value">{{monthSpendText}}</text>
+      </view>
+      <view class="hero-money-side" wx:if="{{budgetText}}">
+        <text class="hero-label">月预算 {{budgetText}}</text>
+        <text class="hero-budget-left {{budgetWarn ? 'is-warn' : ''}}">{{budgetWarn ? '超支 ' : '剩余 '}}{{budgetLeftText}}</text>
+      </view>
+    </view>
+
+    <view class="bar" wx:if="{{budgetText}}">
+      <view class="bar-inner {{budgetWarn ? 'is-warn' : ''}}" style="width:{{budgetPercent}}%"></view>
+    </view>
+  </view>
+
+  <!-- 今日模块 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">记一笔</text>
+      <text class="section-more">长按记录可编辑</text>
+    </view>
+
+    <view class="grid">
+      <view
+        class="grid-item"
+        wx:for="{{board}}"
+        wx:key="key"
+        data-type="{{item.key}}"
+        bindtap="onQuickAdd"
+        hover-class="grid-item-hover"
+        hover-stay-time="60"
+      >
+        <view class="grid-icon" style="background:{{item.soft}};color:{{item.color}}">{{item.icon}}</view>
+        <text class="grid-name">{{item.name}}</text>
+        <text class="grid-value {{item.empty ? 'is-empty' : ''}}">{{item.valueText}}</text>
+        <text class="grid-sub">{{item.subText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近记录 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">最近</text>
+      <text class="section-more" bindtap="onGoList">全部记录 ›</text>
+    </view>
+
+    <view class="card recent">
+      <block wx:if="{{recent.length}}">
+        <view wx:for="{{recent}}" wx:key="id" class="recent-item">
+          <record-card
+            record="{{item}}"
+            bind:itemtap="onRecordTap"
+            bind:itemlong="onRecordLongPress"
+          />
+          <view class="divider" wx:if="{{index < recent.length - 1}}"></view>
+        </view>
+      </block>
+
+      <view wx:else class="empty">
+        <text class="empty-icon">🌱</text>
+        <text class="empty-text">还没有记录，从上面挑一项开始吧</text>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+<!-- 悬浮新增 -->
+<view class="fab" bindtap="onAdd">＋</view>

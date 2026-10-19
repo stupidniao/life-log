@@ -1,0 +1,179 @@
+.page {
+  padding-top: 20rpx;
+}
+
+/* ---------- 顶部概览 ---------- */
+.hero {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F2F8F6 100%);
+  border-radius: 32rpx;
+  padding: 32rpx;
+  border: 1rpx solid #E8EFEC;
+}
+
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-date {
+  font-size: 24rpx;
+  color: #7C8A85;
+  letter-spacing: 0.5rpx;
+}
+
+.hero-badge {
+  font-size: 22rpx;
+  color: #2F7D6D;
+  background: rgba(47, 125, 109, 0.10);
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.hero-greeting {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2429;
+  letter-spacing: 0.5rpx;
+}
+
+.hero-money {
+  margin-top: 32rpx;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.hero-money-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-label {
+  font-size: 22rpx;
+  color: #9AA0A6;
+}
+
+.hero-value {
+  margin-top: 6rpx;
+  font-size: 56rpx;
+  font-weight: 600;
+  color: #1F2429;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-money-side {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8rpx;
+}
+
+.hero-budget-left {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #2F7D6D;
+}
+
+.hero-budget-left.is-warn {
+  color: #E4574C;
+}
+
+.bar {
+  margin-top: 24rpx;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: rgba(47, 125, 109, 0.10);
+  overflow: hidden;
+}
+
+.bar-inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background: #2F7D6D;
+  transition: width 0.3s ease;
+}
+
+.bar-inner.is-warn {
+  background: #E4574C;
+}
+
+/* ---------- 模块宫格 ---------- */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.grid-item {
+  width: 31.8%;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx 18rpx;
+  margin-bottom: 18rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4rpx 20rpx rgba(31, 36, 41, 0.04);
+}
+
+.grid-item-hover {
+  transform: scale(0.97);
+  background: #FAFBFC;
+}
+
+.grid-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-bottom: 14rpx;
+}
+
+.grid-name {
+  font-size: 24rpx;
+  color: #5A626B;
+}
+
+.grid-value {
+  margin-top: 4rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1F2429;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.grid-value.is-empty {
+  color: #C4C8CC;
+  font-weight: 400;
+  font-size: 24rpx;
+}
+
+.grid-sub {
+  margin-top: 2rpx;
+  font-size: 20rpx;
+  color: #B6BBC1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ---------- 最近记录 ---------- */
+.recent {
+  padding: 8rpx 28rpx;
+}
+
+.recent-item:last-child .divider {
+  display: none;
+}

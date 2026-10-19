@@ -1,0 +1,53 @@
+<view class="page">
+
+  <view class="topbar">
+    <view class="month-switch">
+      <view class="month-btn" bindtap="onPrevMonth">‹</view>
+      <text class="month-text">{{monthLabel}}</text>
+      <view class="month-btn" bindtap="onNextMonth">›</view>
+    </view>
+    <text class="summary">共 {{totalCount}} 条</text>
+  </view>
+
+  <scroll-view class="type-bar" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view class="chips">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="chip {{activeType === item.key ? 'is-active' : ''}}"
+        style="{{activeType === item.key ? 'background:' + item.color + ';border-color:' + item.color : ''}}"
+        data-type="{{item.key}}"
+        bindtap="onTabChange"
+      >
+        <text>{{item.icon ? item.icon + ' ' : ''}}{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <block wx:if="{{groups.length}}">
+    <view class="group" wx:for="{{groups}}" wx:key="date" wx:for-item="group">
+      <view class="group-head">
+        <text class="group-date">{{group.label}}</text>
+        <text class="group-count">{{group.count}} 条</text>
+      </view>
+      <view class="card group-body">
+        <view wx:for="{{group.items}}" wx:key="id" class="row">
+          <record-card
+            record="{{item}}"
+            bind:itemtap="onRecordTap"
+            bind:itemlong="onRecordLongPress"
+          />
+          <view class="divider" wx:if="{{index < group.items.length - 1}}"></view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="empty card">
+    <text class="empty-icon">🗂</text>
+    <text class="empty-text">{{monthLabel}}还没有记录</text>
+  </view>
+
+</view>
+
+<view class="fab" bindtap="onAdd">＋</view>

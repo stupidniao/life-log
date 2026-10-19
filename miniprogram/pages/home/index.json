@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "日迹",
+  "navigationBarBackgroundColor": "#F6F7F9",
+  "backgroundColor": "#F6F7F9",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "record-card": "/components/record-card/index"
+  }
+}

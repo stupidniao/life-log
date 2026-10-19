@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "记录",
+  "backgroundColor": "#F6F7F9",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "record-card": "/components/record-card/index"
+  }
+}

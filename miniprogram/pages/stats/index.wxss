@@ -1,0 +1,162 @@
+.page {
+  padding-top: 20rpx;
+}
+
+.type-bar {
+  width: 100%;
+  white-space: nowrap;
+  margin-bottom: 24rpx;
+}
+
+.type-bar .chips {
+  padding: 4rpx 0;
+}
+
+/* ---------- 周期切换 ---------- */
+.seg-wrap {
+  display: flex;
+  background: #EDEFF2;
+  border-radius: 16rpx;
+  padding: 6rpx;
+  margin-bottom: 24rpx;
+}
+
+.seg {
+  flex: 1;
+  text-align: center;
+  height: 64rpx;
+  line-height: 64rpx;
+  font-size: 26rpx;
+  color: #5A626B;
+  border-radius: 12rpx;
+}
+
+.seg.is-active {
+  background: #FFFFFF;
+  color: #1F2429;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(31, 36, 41, 0.06);
+}
+
+/* ---------- 指标卡 ---------- */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 12rpx 0;
+}
+
+.stat {
+  width: 50%;
+  padding: 20rpx 28rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #9AA0A6;
+}
+
+.stat-value {
+  margin-top: 8rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1F2429;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 柱状图 ---------- */
+.chart {
+  padding: 28rpx 24rpx 20rpx;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  height: 260rpx;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  margin-right: 6rpx;
+}
+
+.bar-col:last-child {
+  margin-right: 0;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar-fill {
+  width: 62%;
+  min-height: 6rpx;
+  border-radius: 8rpx 8rpx 4rpx 4rpx;
+  opacity: 0.85;
+  transition: height 0.3s ease;
+}
+
+.bar-label {
+  margin-top: 10rpx;
+  font-size: 18rpx;
+  color: #B6BBC1;
+  height: 24rpx;
+  line-height: 24rpx;
+}
+
+.chart-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F2F4F6;
+  font-size: 22rpx;
+  color: #9AA0A6;
+}
+
+/* ---------- 分布 ---------- */
+.dist {
+  padding: 18rpx 0;
+}
+
+.dist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.dist-label {
+  font-size: 27rpx;
+  color: #1F2429;
+}
+
+.dist-value {
+  font-size: 23rpx;
+  color: #8A9099;
+  font-variant-numeric: tabular-nums;
+}
+
+.dist-track {
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: #F2F4F6;
+  overflow: hidden;
+}
+
+.dist-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  opacity: 0.8;
+  transition: width 0.3s ease;
+}

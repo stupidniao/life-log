@@ -1,0 +1,9 @@
+{
+  "name": "records",
+  "version": "1.0.0",
+  "description": "日迹 - 记录双向增量同步",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.1.2"
+  }
+}

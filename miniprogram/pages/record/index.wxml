@@ -1,0 +1,107 @@
+<view class="page">
+
+  <!-- 类型切换（编辑时不显示，避免改错类型） -->
+  <scroll-view wx:if="{{!editing}}" class="type-bar" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view class="chips">
+      <view
+        wx:for="{{types}}"
+        wx:key="key"
+        class="chip {{activeType === item.key ? 'is-active' : ''}}"
+        style="{{activeType === item.key ? 'background:' + item.color + ';border-color:' + item.color : ''}}"
+        data-type="{{item.key}}"
+        bindtap="onTypeChange"
+      >
+        <text>{{item.icon}} {{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:else class="editing-tip">
+    <text class="editing-dot" style="background:{{typeColor}}"></text>
+    <text>正在编辑一条「{{typeName}}」记录</text>
+  </view>
+
+  <!-- 动态表单 -->
+  <view class="card form">
+    <view class="field" wx:for="{{fields}}" wx:key="key">
+      <view class="field-label">
+        <text>{{item.label}}</text>
+        <text class="req" wx:if="{{item.required}}">*</text>
+      </view>
+
+      <view class="field-control">
+        <!-- 数值输入 -->
+        <block wx:if="{{item.type === 'money' || item.type === 'number' || item.type === 'decimal'}}">
+          <input
+            class="input input-num"
+            type="{{item.type === 'number' ? 'number' : 'digit'}}"
+            value="{{item.value}}"
+            placeholder="{{item.placeholder}}"
+            placeholder-class="ph"
+            data-index="{{index}}"
+            bindinput="onFieldInput"
+          />
+          <text class="unit" wx:if="{{item.unit}}">{{item.unit}}</text>
+        </block>
+
+        <!-- 选择器 -->
+        <picker
+          wx:elif="{{item.type === 'picker'}}"
+          class="picker-wrap"
+          range="{{item.options}}"
+          value="{{item.optionIndex}}"
+          data-index="{{index}}"
+          bindchange="onPickerChange"
+        >
+          <view class="picker-value">
+            <text>{{item.value}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+
+        <!-- 文本 -->
+        <input
+          wx:else
+          class="input"
+          value="{{item.value}}"
+          placeholder="{{item.placeholder}}"
+          placeholder-class="ph"
+          data-index="{{index}}"
+          bindinput="onFieldInput"
+        />
+      </view>
+    </view>
+
+    <!-- 日期与时间 -->
+    <view class="field">
+      <view class="field-label"><text>时间</text></view>
+      <view class="field-control field-control--split">
+        <picker mode="date" value="{{date}}" bindchange="onDateChange">
+          <view class="picker-value">
+            <text>{{dateLabel}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+        <picker mode="time" value="{{time}}" bindchange="onTimeChange">
+          <view class="picker-value">
+            <text>{{time}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <view class="hint">
+    <text>记录仅保存在本机，卸载小程序或清理缓存会丢失。云同步将在下个版本开放。</text>
+  </view>
+
+</view>
+
+<!-- 底部操作 -->
+<view class="footer">
+  <button wx:if="{{editing}}" class="btn btn-ghost" bindtap="onDelete">删除</button>
+  <button class="btn btn-primary" bindtap="onSubmit" loading="{{submitting}}" disabled="{{submitting}}">
+    {{editing ? '保存修改' : '保存'}}
+  </button>
+</view>

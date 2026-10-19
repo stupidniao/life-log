@@ -1,0 +1,124 @@
+<view class="page">
+
+  <view class="card profile">
+    <view class="profile-avatar">日</view>
+    <view class="profile-main">
+      <text class="profile-title">我的日迹</text>
+      <text class="profile-sub">{{spanText}}</text>
+    </view>
+  </view>
+
+  <!-- 预算 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">月支出预算</text>
+    </view>
+    <view class="card row-card">
+      <view class="row-line">
+        <text class="row-label">每月预算</text>
+        <view class="row-right">
+          <text class="row-prefix">¥</text>
+          <input
+            class="row-input"
+            type="digit"
+            value="{{budget}}"
+            placeholder="不设置"
+            placeholder-class="ph"
+            bindinput="onBudgetInput"
+            bindblur="onBudgetBlur"
+          />
+        </view>
+      </view>
+      <text class="row-hint">设置后首页会显示预算剩余进度，填 0 或留空即关闭</text>
+    </view>
+  </view>
+
+  <!-- 模块 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">我的模块</text>
+      <text class="section-more" bindtap="onResetTypes">恢复全部</text>
+    </view>
+
+    <view class="card row-card">
+      <view class="type-row" wx:for="{{typeList}}" wx:key="key">
+        <view class="type-icon" style="background:{{item.soft}};color:{{item.color}}">{{item.icon}}</view>
+        <text class="type-name">{{item.name}}</text>
+        <view class="type-remove" data-key="{{item.key}}" bindtap="onRemoveType">关闭</view>
+      </view>
+      <text class="row-hint">关闭只是从首页隐藏，历史记录不会删除</text>
+    </view>
+  </view>
+
+  <!-- 数据 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">数据</text>
+    </view>
+    <view class="card row-card">
+      <view class="row-line" bindtap="onExport">
+        <text class="row-label">导出全部记录</text>
+        <text class="row-arrow">复制为 JSON ›</text>
+      </view>
+      <view class="divider"></view>
+      <view class="row-line" bindtap="onClear">
+        <text class="row-label is-danger">清空全部记录</text>
+        <text class="row-arrow">共 {{totalCount}} 条 ›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 云同步 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">云同步</text>
+      <text class="section-more">{{lastSyncText}}</text>
+    </view>
+    <view class="card row-card">
+      <view class="row-line">
+        <text class="row-label">环境 ID</text>
+        <view class="row-right">
+          <input
+            class="row-input"
+            value="{{cloudEnv}}"
+            placeholder="云开发环境 ID"
+            placeholder-class="ph"
+            bindinput="onEnvInput"
+            bindblur="onEnvBlur"
+          />
+        </view>
+      </view>
+      <view class="divider"></view>
+      <view class="row-line">
+        <text class="row-label">开启同步</text>
+        <switch checked="{{cloudSync}}" bindchange="onSyncToggle" color="#2F7D6D" />
+      </view>
+      <view class="divider"></view>
+      <view class="row-line" bindtap="onSyncNow">
+        <text class="row-label">立即同步</text>
+        <text class="row-arrow">{{syncing ? '同步中…' : '手动同步 ›'}}</text>
+      </view>
+      <text class="row-hint">开启后记录双向同步到你自己的微信云开发环境，换设备登录同一微信即可恢复。部署步骤见 README「云同步部署指南」。</text>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="section">
+    <view class="card row-card">
+      <view class="row-line" bindtap="onPrivacy">
+        <text class="row-label">隐私说明</text>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="divider"></view>
+      <view class="row-line" bindtap="onAbout">
+        <text class="row-label">关于日迹</text>
+        <text class="row-arrow">v{{version}} ›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="foot-note">
+    <text>数据默认保存在本机；开启云同步后自动备份到云端，换设备可恢复</text>
+  </view>
+
+</view>
