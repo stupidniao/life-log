@@ -66,6 +66,7 @@ function add(draft) {
   const all = store.allPlants().slice();
   all.push(plant);
   store.savePlants(all);
+  sync.scheduleSync();
   return plant;
 }
 
@@ -75,6 +76,7 @@ function update(id, patch) {
   if (idx === -1) return null;
   all[idx] = Object.assign({}, all[idx], patch, { updatedAt: Date.now() });
   store.savePlants(all);
+  sync.scheduleSync();
   return all[idx];
 }
 
@@ -84,6 +86,7 @@ function remove(id) {
   if (idx === -1) return false;
   all[idx] = Object.assign({}, all[idx], { deleted: true, updatedAt: Date.now() });
   store.savePlants(all);
+  sync.scheduleSync();
   return true;
 }
 
