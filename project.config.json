@@ -23,7 +23,7 @@
   "compileType": "miniprogram",
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
-  "appid": "touristappid",
+  "appid": "wx8129269e01a22c8e",
   "projectname": "life-log",
   "condition": {}
 }
