@@ -1,7 +1,7 @@
 # Mini Program Project Archive · Riji (Personal Life-Log Assistant)
 
 > Read this archive to restore context before each development session; update it after each delivery.
-> Last updated: 2026-10-20 (v0.3.0 plant care shipped)
+> Last updated: 2026-10-20 (v0.3.1 plant archive cloud sync shipped)
 
 ---
 
@@ -13,7 +13,7 @@
 | Positioning | Personal life-log assistant: expenses + exercise + weight + sleep + alcohol + reading + plant care, unified record model |
 | Account type | Individual account (tools category, personal use only) |
 | AppID | **Production environment configured** (since 2026-10-20, value in `project.config.json`, not stored in plaintext here); deploy path: trial version (not submitted for review) |
-| Current version | v0.3.0 (REQ-001 plant care: photo registration + AI recognition + care advice; requirement-management mechanism established) |
+| Current version | v0.3.1 (REQ-003 plant archive cloud sync: cross-device sync of plants incl. photos) |
 | Code location | `riji-life-log/` |
 
 ## 2. Tech Stack
@@ -22,7 +22,7 @@
 |---|---|
 | Framework | WeChat native (WXML / WXSS / JS), no uni-app / Taro |
 | Backend | **M2 connected to WeChat Cloud Development** (cloud function `cloudfunctions/records`, bidirectional incremental sync); **REQ-001 added cloud function `cloudfunctions/plantAI`** (plant photo recognition, requires `AI_PROVIDER`/`AI_API_KEY` env vars). Off by default, local Storage remains the working copy |
-| Testing | Zero-dependency Node unit tests: `node tests/run.js` (plant knowledge base / parsing normalization / archive service, 53 cases) |
+| Testing | Zero-dependency Node unit tests: `node tests/run.js` (plant knowledge base / parsing normalization / archive service / plant sync, 61 cases) |
 | Charts | Pure WXSS bar charts / progress bars, no ECharts |
 | Base library | Uses common APIs (`wx.getStorageSync`, `picker`, `scroll-view`), no high-version features; **exact minimum base library version must be verified in DevTools** |
 | Subpackaging | None (main package source ~120KB, far below 2MB limit) |
@@ -61,7 +61,8 @@
 | `wx.cloud.uploadFile / downloadFile` | Photo to cloud storage / fetch image in cloud function | REQ-001; client does not send binary, avoids callFunction 1MB limit |
 | `wx.showModal({editable})` | Plant rename, custom species input | REQ-001; requires base library ≥ 2.17.1 |
 | `wx.cloud.init` | Init cloud dev (only when user filled env ID) | wx.cloud requires base library support, exact minimum per official docs |
-| `wx.cloud.callFunction` | Call cloud function `records` for incremental sync | Cloud function protocol: `{action:'sync', pushes, lastSyncAt}` → `{code, serverTime, pushed, pulls}` |
+| `wx.cloud.callFunction` | Call cloud function `records` for incremental sync | Cloud function protocol: `{action:'sync', pushes, lastSyncAt, plants, lastPlantSyncAt}` → `{code, serverTime, pushed, pulls, plants}` |
+| `wx.cloud.getTempFileURL` | Convert plant photo `cloud://` fileID to a temp `https://` URL | REQ-003; detail page shows photos cross-device this way |
 | `wx.navigateTo` / `wx.navigateBack` / `wx.switchTab` | Routing | — |
 | `wx.setNavigationBarTitle` | Dynamic title on entry page | — |
 
@@ -77,7 +78,7 @@ Record structure (unified, type-agnostic):
 
 - `value` = the numeric redundancy of `fields[type.primary.field]`, stats and charts read only this
 - Event-type `agg: 'sum'` sums; metric-type `agg: 'last'` takes the last entry of the day
-- Storage keys: `life_log_records_v1` (record array), `life_log_settings_v1` (config, including cloud sync dual watermarks `lastSyncAt`/`lastPushAt`), `life_log_plants_v1` (plant archives, REQ-001)
+- Storage keys: `life_log_records_v1` (record array), `life_log_settings_v1` (config, including cloud sync dual watermarks `lastSyncAt`/`lastPushAt` + plant pair `lastPlantSyncAt`/`lastPlantPushAt`), `life_log_plants_v1` (plant archives, REQ-001)
 
 Plant archive structure (REQ-001, same soft-delete discipline):
 
@@ -90,7 +91,7 @@ Plant archive structure (REQ-001, same soft-delete discipline):
 
 - `care.waterDays` is the data reservation for REQ-002 (due reminders)
 - Three archive sources: `createFromAnalysis` (AI, plan AI-first with knowledge-base fallback) / `createManual` (manual pick, plan entirely from knowledge base) / custom name (default 7-day cycle)
-- Photo dual address: cloud fileID preferred, `binderror` falls back to localPath
+- Photo dual address: cloud fileID preferred, `binderror` falls back to localPath. **REQ-003**: `localPath` is device-local and never synced; cross-device display converts `fileID` → temp URL via `wx.cloud.getTempFileURL()`
 
 Service layer interface (`services/record.js`, the page's only dependency):
 `add / update / remove / get / query / decorate / decorateMany / groupByDate / buildBoard / series / statsOf / distribution / monthTotal`
@@ -104,17 +105,18 @@ Plant service (`services/plant.js`, REQ-001):
 Cloud sync (`services/sync.js`):
 - Model: local Storage = working copy, cloud = backup + multi-device sharing; `updatedAt` incremental, bidirectional
 - **Dual watermark**: pull uses server time (`lastSyncAt`), push uses client time (`lastPushAt`) — prevents missing pushes from phone clock drift
+- **REQ-003**: plants sync alongside records with an independent watermark pair (`lastPlantSyncAt`/`lastPlantPushAt`); `photo.fileID` is synced as a flat `photoFileID` field, `localPath` stripped at the boundary
 - Conflict: last-write-wins; keep local version when there are unpushed local updates
-- Cloud function `_id` = record `id`, upsert naturally dedupes; data isolated by `_openid`, whitelisted field writes
-- 2s debounce auto-sync after writes (hooked in `record.js` add/update/remove); sync once on app launch
+- Cloud function `_id` = record/plant `id`, upsert naturally dedupes; data isolated by `_openid`, whitelisted field writes
+- 2s debounce auto-sync after writes (hooked in `record.js` and `plant.js` add/update/remove); sync once on app launch
 
 ## 5. Todos & Known Issues
 
 **Todos (by priority)**
 
 1. **REQ-001 real-environment verification** (user side): deploy cloud function plantAI → set `AI_PROVIDER`/`AI_API_KEY` env vars → real-device photo test of recognition quality (steps in README "Plant Care" section)
-2. **REQ-002 watering/sunlight due reminders**: filed (docs/requirements/REQ-002), design memo complete, restart condition = REQ-001 used for two weeks
-3. **Requirement-management mechanism established** (docs/requirements-ledger.md): register ID before writing design doc, backfill version after delivery
+2. **REQ-003 deploy step** (user side): redeploy `records` cloud function → create `plants` collection in cloud console → add compound index `openid`(asc) + `updatedAt`(asc)
+3. **REQ-002 watering/sunlight due reminders**: filed (docs/requirements/REQ-002), design memo complete, restart condition = REQ-001 used for two weeks
 4. Real-device verification: `input type="digit"` keyboard, `picker` layer, `showModal editable` on iOS & Android
 5. Add tabBar icons (`iconPath` not required, currently text-only)
 6. Empty-data first-launch onboarding (current home empty state is just one line)
@@ -140,6 +142,7 @@ Cloud sync (`services/sync.js`):
 | v0.2.0 | 2026-10-19 | M2: cloud dev sync (cloud function records + services/sync.js dual-watermark incremental sync + cloud sync controls on Me page + README deploy guide); sync simulation tests 18/18 passed |
 | — | 2026-10-20 | User obtained production AppID and configured it (commit bf7b2ef), chose trial-version path, personal use only; review deferred |
 | v0.3.0 | 2026-10-20 | REQ-001 plant care: photo registration (chooseMedia → compress → cloud storage → cloud function plantAI → Zhipu GLM-4V-Flash / qwen-vl multimodal recognition), 24-species knowledge-base fallback, seven care items + issue diagnosis + tips, two new pages, requirement-ledger mechanism, zero-dependency Node unit tests 53 cases. Review process: user cut reminders after review (split into REQ-002), established requirement-management mechanism |
+| v0.3.1 | 2026-10-20 | REQ-003 plant archive cloud sync: plants now sync cross-device alongside records via the records cloud function (separate `plants` collection + whitelist), independent watermark pair, photo `fileID` synced as flat field with `localPath` stripped, detail page converts `fileID` → temp URL via `getTempFileURL`. 61 unit tests green |
 
 **v0.3.0 development self-review (superpowers flow)**
 

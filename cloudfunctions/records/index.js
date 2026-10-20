@@ -17,11 +17,19 @@ const db = cloud.database();
 const _ = db.command;
 
 const COL = 'records';
+const PLANT_COL = 'plants';
 const PAGE = 100;        // 单次查询条数上限，参考云开发文档
 const MAX_PULL = 5000;   // 防御上限：单次同步最多拉 5000 条
 
 // 白名单字段：客户端提交的记录只拷贝这些 key，其余一概丢弃
 const SAFE_KEYS = ['id', 'type', 'date', 'time', 'value', 'fields', 'note', 'deleted', 'createdAt', 'updatedAt'];
+
+// 植物档案白名单（REQ-003）：localPath 等本地临时字段不在列，天然被剥离
+const PLANT_SAFE_KEYS = [
+  'id', 'name', 'species', 'speciesKey', 'emoji', 'photoFileID',
+  'care', 'health', 'issues', 'tips', 'confidence', 'source',
+  'createdAt', 'updatedAt', 'deleted'
+];
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
@@ -45,6 +53,18 @@ exports.main = async (event) => {
 
       // set：存在则整体替换，不存在则创建 —— 与"全量记录推送"的模型一致
       await db.collection(COL).doc(r.id).set({ data: doc });
+    }
+
+    /* ---- 1b. 植物档案上行（REQ-003） ---- */
+    const plantPushes = Array.isArray(event.plants) ? event.plants : [];
+    for (const p of plantPushes) {
+      if (!p || !p.id) continue;
+      const doc = { openid: OPENID };
+      PLANT_SAFE_KEYS.forEach(k => {
+        if (p[k] !== undefined) doc[k] = p[k];
+      });
+      doc.id = p.id;
+      await db.collection(PLANT_COL).doc(p.id).set({ data: doc });
     }
 
     /* ---- 2. 下行：拉取本人 updatedAt > lastSyncAt 的记录（分页） ---- */
@@ -73,11 +93,38 @@ exports.main = async (event) => {
       return c;
     });
 
+    /* ---- 2b. 植物档案下行（REQ-003） ---- */
+    const plantCond = { openid: OPENID, updatedAt: _.gt(Number(event.lastPlantSyncAt) || 0) };
+    const plantPulls = [];
+    let pSkip = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const res = await db.collection(PLANT_COL)
+        .where(plantCond)
+        .orderBy('updatedAt', 'asc')
+        .skip(pSkip)
+        .limit(PAGE)
+        .get();
+      plantPulls.push.apply(plantPulls, res.data);
+      if (res.data.length < PAGE || pSkip + PAGE >= MAX_PULL) break;
+      pSkip += PAGE;
+    }
+
+    const cleanPlants = plantPulls.map(d => {
+      const c = {};
+      PLANT_SAFE_KEYS.forEach(k => {
+        if (d[k] !== undefined) c[k] = d[k];
+      });
+      return c;
+    });
+
     return {
       code: 0,
       serverTime: Date.now(),
       pushed: pushes.length,
-      pulls: clean
+      pulls: clean,
+      plantPushed: plantPushes.length,
+      plants: cleanPlants
     };
   } catch (err) {
     console.error('[records] 同步失败', err);

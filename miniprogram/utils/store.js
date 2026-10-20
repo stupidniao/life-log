@@ -21,7 +21,10 @@ const DEFAULT_SETTINGS = {
   cloudSync: false,     // 总开关
   cloudEnv: '',         // 云开发环境 ID（也可写死在 app.js globalData.cloudEnv）
   lastSyncAt: 0,        // 拉取水位线（服务器时间）
-  lastPushAt: 0         // 推送水位线（客户端时间，防时钟偏差漏推）
+  lastPushAt: 0,        // 推送水位线（客户端时间，防时钟偏差漏推）
+  // ---- 植物档案云同步（REQ-003）：与记录独立的一对水位线 ----
+  lastPlantSyncAt: 0,
+  lastPlantPushAt: 0
 };
 
 let recordCache = null;

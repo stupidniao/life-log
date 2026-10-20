@@ -44,7 +44,9 @@ Page({
     }
     this.setData({
       loaded: true,
-      photoSrc: p.photo.fileID || p.photo.localPath || '',
+      // fileID 是 cloud:// 协议，<image> 不能直接显示；先落到 localPath 兜底，
+      // 有 fileID 时下面 resolvePhotoUrl 再换成 https 临时链接
+      photoSrc: p.photo.localPath || '',
       photoFallback: p.photo.localPath || '',
       emoji: p.emoji || '🪴',
       name: p.name,
@@ -56,6 +58,28 @@ Page({
       advice: plantCare.adviceItems(p.care),
       issues: p.issues || [],
       tips: p.tips || []
+    });
+
+    // 有云端 fileID 时，换临时 URL 显示（跨设备也能看照片）
+    if (p.photo && p.photo.fileID) {
+      this.resolvePhotoUrl(p.photo.fileID);
+    }
+  },
+
+  resolvePhotoUrl(fileID) {
+    const that = this;
+    if (!wx.cloud || !wx.cloud.getTempFileURL) return;
+    wx.cloud.getTempFileURL({
+      fileList: [fileID],
+      success: function (res) {
+        const item = res.fileList && res.fileList[0];
+        if (item && item.tempFileURL) {
+          that.setData({ photoSrc: item.tempFileURL });
+        }
+      },
+      fail: function () {
+        // 换 URL 失败（离线等）保持 localPath 兜底
+      }
     });
   },
 

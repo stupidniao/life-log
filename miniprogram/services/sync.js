@@ -69,6 +69,86 @@ function mergePulls(localRecords, pulls) {
   return Object.keys(map).map(k => map[k]);
 }
 
+/* ---------------- 绿植档案同步（REQ-003） ---------------- */
+
+/**
+ * 计算需要上行的植物档案：updatedAt > 植物推水位线（含软删除）。
+ * 与 computePushes 同款语义，只是数据源换成植物。
+ */
+function computePlantPushes(allPlants, lastPlantPushAt) {
+  return (allPlants || []).filter(p => (p.updatedAt || 0) > (lastPlantPushAt || 0));
+}
+
+/**
+ * 植物下行合并：按 id 去重；本地存在更新的未推送修改时保留本地。
+ * 云端的 photoFileID 为空时不覆盖本地已有的 fileID（避免空值回写丢照片）。
+ */
+function mergePlantPulls(localPlants, pulls) {
+  const map = {};
+  (localPlants || []).forEach(p => { map[p.id] = p; });
+  (pulls || []).forEach(d => {
+    if (!d || !d.id) return;
+    const local = map[d.id];
+    if (local && (local.updatedAt || 0) > (d.updatedAt || 0)) return;
+    map[d.id] = cloudDocToPlant(d, local);
+  });
+  return Object.keys(map).map(k => map[k]);
+}
+
+/**
+ * 本地档案 → 云端文档：fileID 提到平铺字段 photoFileID，localPath 一律剥离
+ * （本地临时路径跨设备无意义，绝不能上云）。
+ */
+function plantToCloudDoc(plant) {
+  const p = plant || {};
+  const doc = {
+    id: p.id,
+    name: p.name,
+    species: p.species,
+    speciesKey: p.speciesKey,
+    emoji: p.emoji,
+    photoFileID: (p.photo && p.photo.fileID) || '',
+    care: p.care,
+    health: p.health,
+    issues: p.issues,
+    tips: p.tips,
+    confidence: p.confidence,
+    source: p.source,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+    deleted: p.deleted
+  };
+  return doc;
+}
+
+/**
+ * 云端文档 → 本地档案：photoFileID 还原为 photo.fileID，localPath 置空。
+ * @param {object} doc 云端文档
+ * @param {object} [local] 本地已存在档案（用于 fileID 空值时兜底，避免覆盖丢照片）
+ */
+function cloudDocToPlant(doc, local) {
+  const d = doc || {};
+  const existingFileID = (local && local.photo && local.photo.fileID) || '';
+  const fileID = d.photoFileID || existingFileID;
+  return {
+    id: d.id,
+    name: d.name,
+    species: d.species,
+    speciesKey: d.speciesKey,
+    emoji: d.emoji,
+    photo: { fileID: fileID || '', localPath: '' },
+    care: d.care,
+    health: d.health,
+    issues: d.issues,
+    tips: d.tips,
+    confidence: d.confidence,
+    source: d.source,
+    createdAt: d.createdAt,
+    updatedAt: d.updatedAt,
+    deleted: d.deleted
+  };
+}
+
 /* ---------------- 同步主流程 ---------------- */
 
 /**
@@ -82,14 +162,26 @@ async function syncNow() {
   syncing = true;
   try {
     const all = store.allRecords();          // 含软删除记录
+    const plants = store.allPlants();        // 含软删除植物档案
     const settings = store.getSettings();
     const since = settings.lastSyncAt || 0;
     const lastPushAt = settings.lastPushAt || 0;
+    const lastPlantSyncAt = settings.lastPlantSyncAt || 0;
+    const lastPlantPushAt = settings.lastPlantPushAt || 0;
 
     const pushes = computePushes(all, lastPushAt).slice(0, MAX_PUSH);
+    const plantPushes = computePlantPushes(plants, lastPlantPushAt)
+      .slice(0, MAX_PUSH)
+      .map(plantToCloudDoc);
     const res = await wx.cloud.callFunction({
       name: CLOUD_FUNCTION,
-      data: { action: 'sync', pushes: pushes, lastSyncAt: since }
+      data: {
+        action: 'sync',
+        pushes: pushes,
+        lastSyncAt: since,
+        plants: plantPushes,
+        lastPlantSyncAt: lastPlantSyncAt
+      }
     });
 
     const r = res && res.result;
@@ -101,15 +193,33 @@ async function syncNow() {
     const merged = mergePulls(all, r.pulls || []);
     store.saveRecords(merged);
 
-    // 双水位线：拉取用服务器时钟；推水位线取"本次推送记录中最大的客户端 updatedAt"
+    // 植物下行：云端 photoFileID 还原为 photo.fileID，合并后写回
+    if (r.plants && r.plants.length) {
+      const mergedPlants = mergePlantPulls(plants, r.plants);
+      store.savePlants(mergedPlants);
+    }
+
+    // 双水位线（记录）：拉取用服务器时钟；推水位线取"本次推送记录中最大的客户端 updatedAt"
     const patch = { lastSyncAt: r.serverTime };
     if (pushes.length) {
       const maxPushed = Math.max.apply(null, pushes.map(x => x.updatedAt || 0));
       patch.lastPushAt = Math.max(lastPushAt, maxPushed);
     }
+    // 植物独立水位线（REQ-003）：与记录互不干扰
+    patch.lastPlantSyncAt = r.serverTime;
+    if (plantPushes.length) {
+      const maxPlantPushed = Math.max.apply(null, plantPushes.map(x => x.updatedAt || 0));
+      patch.lastPlantPushAt = Math.max(lastPlantPushAt, maxPlantPushed);
+    }
     store.patchSettings(patch);
 
-    return { ok: true, pushed: pushes.length, pulled: (r.pulls || []).length };
+    return {
+      ok: true,
+      pushed: pushes.length,
+      pulled: (r.pulls || []).length,
+      plantPushed: plantPushes.length,
+      plantPulled: (r.plants || []).length
+    };
   } catch (err) {
     console.error('[sync] 同步失败', err);
     return { ok: false, error: err };
@@ -140,6 +250,10 @@ module.exports = {
   isSyncing,
   computePushes,
   mergePulls,
+  computePlantPushes,
+  mergePlantPulls,
+  plantToCloudDoc,
+  cloudDocToPlant,
   // 供其他服务（如绿植识别）复用：环境 ID 读取与一次性云初始化
   getCloudEnv,
   ensureInit
