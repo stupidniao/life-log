@@ -139,5 +139,8 @@ module.exports = {
   scheduleSync,
   isSyncing,
   computePushes,
-  mergePulls
+  mergePulls,
+  // 供其他服务（如绿植识别）复用：环境 ID 读取与一次性云初始化
+  getCloudEnv,
+  ensureInit
 };

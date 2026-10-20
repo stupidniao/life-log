@@ -8,7 +8,8 @@
 
 const KEYS = {
   RECORDS: 'life_log_records_v1',
-  SETTINGS: 'life_log_settings_v1'
+  SETTINGS: 'life_log_settings_v1',
+  PLANTS: 'life_log_plants_v1'
 };
 
 const DEFAULT_SETTINGS = {
@@ -25,6 +26,7 @@ const DEFAULT_SETTINGS = {
 
 let recordCache = null;
 let settingsCache = null;
+let plantCache = null;
 
 function init() {
   if (recordCache === null) {
@@ -34,6 +36,10 @@ function init() {
   if (settingsCache === null) {
     const saved = wx.getStorageSync(KEYS.SETTINGS) || {};
     settingsCache = Object.assign({}, DEFAULT_SETTINGS, saved);
+  }
+  if (plantCache === null) {
+    plantCache = wx.getStorageSync(KEYS.PLANTS) || [];
+    if (!Array.isArray(plantCache)) plantCache = [];
   }
 }
 
@@ -75,6 +81,27 @@ function clearRecords() {
   saveRecords([]);
 }
 
+/* ---------------- 绿植档案（REQ-001） ---------------- */
+
+/** 同步取全部植物档案（含软删除） */
+function allPlants() {
+  init();
+  return plantCache;
+}
+
+/** 覆盖写入全部植物档案，写失败回滚内存态（与 saveRecords 同款纪律） */
+function savePlants(list) {
+  const previous = plantCache;
+  plantCache = list;
+  try {
+    wx.setStorageSync(KEYS.PLANTS, list);
+  } catch (err) {
+    plantCache = previous;
+    console.error('[store] 绿植档案写入失败', err);
+    throw err;
+  }
+}
+
 module.exports = {
   KEYS,
   DEFAULT_SETTINGS,
@@ -83,5 +110,7 @@ module.exports = {
   saveRecords,
   getSettings,
   patchSettings,
-  clearRecords
+  clearRecords,
+  allPlants,
+  savePlants
 };

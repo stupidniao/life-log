@@ -1,0 +1,9 @@
+{
+  "name": "plantAI",
+  "version": "1.0.0",
+  "description": "日迹 - 绿植照片识别与养护建议（REQ-001）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.1.2"
+  }
+}

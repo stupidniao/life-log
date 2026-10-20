@@ -50,6 +50,19 @@
     </view>
   </view>
 
+  <!-- 绿植 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">绿植</text>
+    </view>
+    <view class="card row-card">
+      <view class="row-line" bindtap="onGoPlants">
+        <text class="row-label">我的绿植</text>
+        <text class="row-arrow">拍照识别 · 养护建议 ›</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 数据 -->
   <view class="section">
     <view class="section-head">

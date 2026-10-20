@@ -1,0 +1,228 @@
+.page {
+  padding-top: 24rpx;
+}
+
+/* ---------- 头部 ---------- */
+.hero {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F7F4 100%);
+  border-radius: 32rpx;
+  padding: 32rpx;
+  border: 1rpx solid #E8EFEC;
+}
+
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2429;
+}
+
+.hero-count {
+  font-size: 24rpx;
+  color: #2F7D6D;
+  background: rgba(47, 125, 109, 0.10);
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.hero-sub {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #9AA0A6;
+}
+
+.photo-btn {
+  margin-top: 28rpx;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 20rpx;
+  background: #2F7D6D;
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 500;
+  padding: 0;
+}
+
+.photo-btn::after {
+  border: none;
+}
+
+.photo-btn:active {
+  opacity: 0.85;
+}
+
+.manual-pick {
+  display: block;
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #2F7D6D;
+  padding: 8rpx 0;
+}
+
+/* ---------- 品种选择抽屉 ---------- */
+.sheet-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(31, 36, 41, 0.45);
+  z-index: 30;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 16rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));
+  z-index: 31;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-bar {
+  align-self: center;
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #E5E8EB;
+}
+
+.sheet-title {
+  margin: 20rpx 0 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2429;
+}
+
+.sheet-list {
+  flex: 1;
+  max-height: 52vh;
+}
+
+.sheet-item {
+  padding: 26rpx 8rpx;
+  font-size: 28rpx;
+  color: #1F2429;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.sheet-item:last-child {
+  border-bottom: none;
+}
+
+.sheet-item-hover {
+  background: #F6F8F7;
+}
+
+/* ---------- 档案卡片 ---------- */
+.plant-card {
+  display: flex;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 24rpx rgba(31, 36, 41, 0.04);
+}
+
+.plant-card-hover {
+  transform: scale(0.98);
+  background: #FAFBFC;
+}
+
+.plant-photo-wrap {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #F2F4F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plant-photo {
+  width: 100%;
+  height: 100%;
+}
+
+.plant-photo-ph {
+  font-size: 56rpx;
+  opacity: 0.5;
+}
+
+.plant-main {
+  flex: 1;
+  margin-left: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.plant-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plant-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2429;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: #F1F3F4;
+  color: #9AA0A6;
+}
+
+.pill.tone-ok {
+  background: rgba(47, 158, 110, 0.12);
+  color: #2F9E6E;
+}
+
+.pill.tone-warn {
+  background: rgba(217, 154, 43, 0.14);
+  color: #B57E14;
+}
+
+.pill.tone-danger {
+  background: rgba(228, 87, 76, 0.12);
+  color: #E4574C;
+}
+
+.plant-species {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #5A626B;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plant-source {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #B6BBC1;
+}

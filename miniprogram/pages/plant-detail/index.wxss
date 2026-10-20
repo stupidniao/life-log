@@ -1,0 +1,182 @@
+.page {
+  padding-top: 24rpx;
+}
+
+/* ---------- 照片 ---------- */
+.photo-wrap {
+  height: 420rpx;
+  border-radius: 28rpx;
+  overflow: hidden;
+  background: #F2F4F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+}
+
+.photo-ph {
+  font-size: 120rpx;
+  opacity: 0.5;
+}
+
+/* ---------- 基本信息卡 ---------- */
+.head-card {
+  margin-top: 24rpx;
+}
+
+.head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2429;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: #2F7D6D;
+  padding: 4rpx 8rpx;
+}
+
+.meta {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.species {
+  font-size: 26rpx;
+  color: #5A626B;
+}
+
+.tag {
+  margin-left: 16rpx;
+  font-size: 22rpx;
+  color: #9AA0A6;
+}
+
+.health-row {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pill {
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  background: #F1F3F4;
+  color: #9AA0A6;
+}
+
+.pill.tone-ok {
+  background: rgba(47, 158, 110, 0.12);
+  color: #2F9E6E;
+}
+
+.pill.tone-warn {
+  background: rgba(217, 154, 43, 0.14);
+  color: #B57E14;
+}
+
+.pill.tone-danger {
+  background: rgba(228, 87, 76, 0.12);
+  color: #E4574C;
+}
+
+.species-pick {
+  font-size: 24rpx;
+  color: #2F7D6D;
+  padding: 4rpx 8rpx;
+}
+
+/* ---------- 当前问题 ---------- */
+.issue {
+  padding: 16rpx 0;
+}
+
+.issue + .issue {
+  border-top: 1rpx solid #EDEFF2;
+}
+
+.issue-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1F2429;
+}
+
+.issue-detail {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #5A626B;
+  line-height: 1.6;
+}
+
+/* ---------- 养护建议 ---------- */
+.advice {
+  display: flex;
+  padding: 18rpx 0;
+}
+
+.advice + .advice {
+  border-top: 1rpx solid #EDEFF2;
+}
+
+.advice-label {
+  flex: 0 0 110rpx;
+  font-size: 26rpx;
+  color: #9AA0A6;
+}
+
+.advice-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #1F2429;
+  line-height: 1.6;
+}
+
+.empty.small {
+  padding: 40rpx 0;
+}
+
+/* ---------- 小贴士 ---------- */
+.tip {
+  display: block;
+  padding: 8rpx 0;
+  font-size: 26rpx;
+  color: #5A626B;
+  line-height: 1.6;
+}
+
+/* ---------- 删除 ---------- */
+.btn-danger {
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 20rpx;
+  background: #FFFFFF;
+  color: #E4574C;
+  border: 1rpx solid #F2D6D3;
+  font-size: 28rpx;
+  padding: 0;
+}
+
+.btn-danger::after {
+  border: none;
+}
