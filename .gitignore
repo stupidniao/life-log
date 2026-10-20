@@ -1,23 +1,26 @@
-# 微信开发者工具：个人本地配置（含 appid、编译选项等，每人不同，不入库）
+# WeChat DevTools: personal local config (appid, compile options, etc. — differs per user, not committed)
 project.private.config.json
 
-# 依赖
+# Dependencies
 node_modules/
 cloudfunctions/*/node_modules/
 miniprogram/node_modules/
 
-# 云函数调试日志
+# Cloud function debug logs
 cloudfunctions/*/logs/
 
-# 系统文件
+# System files
 .DS_Store
 Thumbs.db
 
-# 编辑器
+# Editors
 .vscode/
 .idea/
 *.swp
 
-# 本地备份 / 导出物（含真实记录数据，不要提交）
+# Local backup / export artifacts (contain real record data, do not commit)
 *.local.json
 exports/
+
+# WorkBuddy workspace memory (not part of the deliverable)
+.workbuddy/

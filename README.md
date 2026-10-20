@@ -1,103 +1,103 @@
-# 日迹 · 个人生活记录助手
+# Riji (日迹) · Personal Life-Log Assistant
 
-一个用微信小程序做的个人生活记录工具：记账、运动、体重、睡眠、喝酒、阅读……统一记成一条时间线。v0.3.0 起还能**拍照注册绿植、AI 识别品种、拿养护建议**。
+A personal life-logging tool built as a WeChat Mini Program: expenses, exercise, weight, sleep, alcohol, reading... all recorded into one unified timeline. Since v0.3.0 it can also **register houseplants by photo, identify the species via AI, and generate care advice**.
 
-**核心设计**：类型注册表驱动。新增一个记录模块只需在 `miniprogram/config/recordTypes.js` 加一段配置，首页卡片、录入表单、列表、统计图表全部自动适配，页面代码零改动。
+**Core design**: driven by a type registry. Adding a new recording module only requires adding a config block in `miniprogram/config/recordTypes.js` — home cards, entry forms, lists, and stats charts all adapt automatically with zero page-code changes.
 
-**需求管理**：每个功能需求在 [docs/需求台账.md](docs/需求台账.md) 登记，配独立设计文档（`docs/需求/REQ-XXX-*.md`），与版本号一一对应——想知道某个版本做了什么，翻台账即可。
+**Requirement management**: every feature request is registered in [docs/requirements-ledger.md](docs/requirements-ledger.md) with a dedicated design document (`docs/requirements/REQ-XXX-*.md`), mapped one-to-one to a version number — to know what a version delivered, just check the ledger.
 
-**跑测试**：`node tests/run.js`（零依赖，覆盖绿植知识库、模型返回归一化、档案服务）。
-
----
-
-## 快速开始
-
-1. 打开 **微信开发者工具** → 导入项目
-2. 目录选择本文件夹（含 `project.config.json` 的那一层）
-3. AppID 选「测试号」即可（`project.config.json` 里已填 `touristappid`）
-4. 编译运行
-
-无需云开发、无需服务器、无需配置任何 key，开箱即跑。
-
-**要发布到微信里给别人用**？看 [docs/部署指南.md](docs/部署指南.md)（注册 AppID → 体验版 → 云开发 → 提审发布，含踩坑点）。
+**Run tests**: `node tests/run.js` (zero-dependency, covers the plant knowledge base, model-response normalization, and archive service).
 
 ---
 
-## 目录结构
+## Quick Start
+
+1. Open **WeChat DevTools** → Import project
+2. Choose this folder (the one containing `project.config.json`)
+3. Pick "Tourist AppID" for AppID (already set to `touristappid` in `project.config.json`)
+4. Compile and run
+
+No cloud development, no server, no key configuration needed — runs out of the box.
+
+**Want to publish it for others to use in WeChat?** See [docs/deployment-guide.md](docs/deployment-guide.md) (register AppID → trial version → cloud dev → submit for review, with pitfalls covered).
+
+---
+
+## Directory Structure
 
 ```
-日迹-life-log/
-├── project.config.json          项目配置（miniprogramRoot / cloudfunctionRoot）
+riji-life-log/
+├── project.config.json          Project config (miniprogramRoot / cloudfunctionRoot)
 ├── docs/
-│   ├── 需求台账.md              ★ 需求索引：编号 → 设计文档 → 版本
-│   ├── 需求/                    每个需求一份设计文档（REQ-XXX）
-│   ├── 设计方案.md               架构、数据模型、里程碑、合规说明
-│   └── 部署指南.md               从本地跑通到提审发布的全流程
-├── 小程序项目档案.md             开发进度档案（跨会话续接用）
-├── tests/                       零依赖 Node 单测（node tests/run.js）
+│   ├── requirements-ledger.md   ★ Requirement index: ID → design doc → version
+│   ├── requirements/            One design doc per requirement (REQ-XXX)
+│   ├── design.md                Architecture, data model, milestones, compliance notes
+│   └── deployment-guide.md      From local run to review & release, full workflow
+├── project-archive.md           Development progress archive (for cross-session continuity)
+├── tests/                       Zero-dependency Node unit tests (node tests/run.js)
 ├── cloudfunctions/
-│   ├── records/                 云函数：双向增量同步（M2，可选部署）
-│   └── plantAI/                 云函数：绿植照片识别（REQ-001，可选部署）
+│   ├── records/                 Cloud function: bidirectional incremental sync (M2, optional deploy)
+│   └── plantAI/                 Cloud function: plant photo recognition (REQ-001, optional deploy)
 └── miniprogram/
     ├── app.js / app.json / app.wxss
-    ├── config/recordTypes.js    ★ 类型注册表：所有模块的唯一真相源
+    ├── config/recordTypes.js    ★ Type registry: the single source of truth for all modules
     ├── utils/
-    │   ├── date.js              日期工具（统一 YYYY-MM-DD 字符串）
-    │   ├── store.js             存储层（本地 Storage + 云同步水位线 + 绿植档案）
-    │   └── plantCare.js         绿植知识库（24 种常见室内植物）与方案归一化
+    │   ├── date.js              Date utils (unified YYYY-MM-DD string)
+    │   ├── store.js             Storage layer (local Storage + cloud sync watermark + plant archive)
+    │   └── plantCare.js         Plant knowledge base (24 common indoor plants) & care normalization
     ├── services/
-    │   ├── record.js            记录服务：增删改查 + 看板 + 趋势 + 分布（写后自动触发云同步）
-    │   ├── sync.js              云同步：双水位线增量同步、防抖、冲突合并
-    │   └── plant.js             绿植服务：档案 CRUD + 拍照识别流程
+    │   ├── record.js            Record service: CRUD + board + trend + distribution (auto-triggers cloud sync on write)
+    │   ├── sync.js              Cloud sync: dual-watermark incremental sync, debounce, conflict merge
+    │   └── plant.js             Plant service: archive CRUD + photo recognition flow
     ├── components/
-    │   └── record-card/         记录卡片（纯展示，无业务判断）
+    │   └── record-card/         Record card (pure display, no business logic)
     └── pages/
-        ├── home/                今日看板
-        ├── record/              记一笔 / 编辑（动态表单）
-        ├── list/                流水（按月分组 + 类型筛选）
-        ├── stats/               统计（趋势柱图 + 构成分布）
-        ├── mine/                预算、模块开关、云同步、我的绿植入口、导出、清空
-        ├── plants/              我的绿植（拍照注册 + 档案列表 + 品种选择抽屉）
-        └── plant-detail/        绿植详情（养护建议 + 问题诊断 + 改品种）
+        ├── home/                Today's dashboard
+        ├── record/              Log an entry / edit (dynamic form)
+        ├── list/                Timeline (grouped by month + type filter)
+        ├── stats/               Stats (trend bars + composition distribution)
+        ├── mine/                Budget, module toggles, cloud sync, My Plants entry, export, clear
+        ├── plants/              My Plants (photo registration + archive list + species picker drawer)
+        └── plant-detail/        Plant detail (care advice + issue diagnosis + change species)
 ```
 
 ---
 
-## 绿植养护（v0.3.0，REQ-001）
+## Plant Care (v0.3.0, REQ-001)
 
-「我的 → 我的绿植」→ 拍照识别新绿植：品种、健康状态、当前问题、养护七项建议（光照/浇水/温度/湿度/施肥/土壤/毒性）一次给全。设计细节见 [docs/需求/REQ-001](docs/需求/REQ-001-绿植养护-拍照识别与建议.md)。
+"Me → My Plants" → photograph a new plant: species, health status, current issues, and seven care items (light/water/temperature/humidity/fertilizer/soil/toxicity) all returned at once. Design details in [docs/requirements/REQ-001](docs/requirements/REQ-001-plant-care-photo-registration-and-advice.md).
 
-**不部署任何云端也能用**：拍照后手动从 24 种常见室内植物里选一个，方案从内置知识库出。AI 自动识别需要：
+**Works with zero cloud deployment**: after taking a photo, manually pick from 24 common indoor plants and the plan comes from the built-in knowledge base. AI auto-recognition requires:
 
-1. 开发者工具右键 `cloudfunctions/plantAI` → **上传并部署：云端安装依赖**
-2. 云开发控制台 → 云函数 plantAI → 配置 → 环境变量：`AI_PROVIDER=zhipu`、`AI_API_KEY=<智谱开放平台的 Key>`（免费档 GLM-4V-Flash）
-3. 想换阿里百炼：`AI_PROVIDER=dashscope` + 百炼的 Key（默认模型 qwen-vl-max）
+1. In DevTools, right-click `cloudfunctions/plantAI` → **Upload and Deploy: Cloud Install Dependencies**
+2. Cloud dev console → cloud function plantAI → Config → environment variables: `AI_PROVIDER=zhipu`, `AI_API_KEY=<key from Zhipu open platform>` (free tier GLM-4V-Flash)
+3. To switch to Alibaba Bailian: `AI_PROVIDER=dashscope` + a Bailian key (default model qwen-vl-max)
 
-照片只存你自己的云开发环境 + 模型厂商；识别失败自动落回手选，建档永不中断。
-
----
-
-## 云同步部署指南（可选，v0.2.0+）
-
-**不开云同步，程序完全本地可用，无需以下任何步骤。**
-
-前提：需要一个已注册的小程序 AppID（**个人主体即可**；测试号 touristappid 无法开通云开发）。
-
-1. 微信开发者工具顶部「云开发」→ 开通并创建环境，记下**环境 ID**（形如 `life-log-3gxxxxxx`）
-2. 云开发控制台 → 数据库 → 创建集合 **`records`**（权限保持默认"仅创建者可读写"即可——客户端不直连数据库，所有访问都走云函数）
-3. 索引管理 → 给 `records` 添加复合索引：`openid`（升序）+ `updatedAt`（升序），同步拉取走这条查询
-4. 开发者工具中右键 `cloudfunctions/records` → **「上传并部署：云端安装依赖」**
-5. 小程序内「我的 → 云同步」→ 填环境 ID → 打开开关。首次开启会把历史记录全部推上云
-
-验证：云开发控制台 → 数据库 → `records` 里应能看到你的记录。
-
-说明：云开发有免费额度，超出后按量计费，**资费以微信官方最新政策为准**；数据按 `_openid` 隔离，只有你自己的微信能读到。
+Photos are only stored in your own cloud dev environment + the model provider; recognition failure automatically falls back to manual selection, so archive creation never breaks.
 
 ---
 
-## 怎么加一个新模块（比如「服药」）
+## Cloud Sync Deployment Guide (optional, v0.2.0+)
 
-只改 `miniprogram/config/recordTypes.js`，往 `TYPES` 数组里追加：
+**Without cloud sync, the app is fully usable locally — none of the steps below are required.**
+
+Prerequisite: a registered Mini Program AppID (**individual account is fine**; the touristappid cannot enable cloud dev).
+
+1. In WeChat DevTools top bar, "Cloud Dev" → enable and create an environment, note the **environment ID** (like `life-log-3gxxxxxx`)
+2. Cloud dev console → Database → create collection **`records`** (keep default "creator read/write only" permission — the client never hits the DB directly, all access goes through the cloud function)
+3. Index management → add a compound index on `records`: `openid` (asc) + `updatedAt` (asc); incremental pulls use this query
+4. In DevTools, right-click `cloudfunctions/records` → **"Upload and Deploy: Cloud Install Dependencies"**
+5. In the Mini Program, "Me → Cloud Sync" → fill environment ID → toggle on. First enable pushes all historical records up
+
+Verification: cloud dev console → Database → your records should appear in `records`.
+
+Note: cloud dev has a free quota, beyond which it bills by usage, **pricing subject to WeChat's latest official policy**; data is isolated by `_openid`, only your own WeChat account can read it.
+
+---
+
+## How to Add a New Module (e.g. "Medication")
+
+Only edit `miniprogram/config/recordTypes.js`, append to the `TYPES` array:
 
 ```js
 {
@@ -118,21 +118,21 @@
 }
 ```
 
-保存 → 首页多一张卡片、录入页多一个类型、统计页多一个 tab、列表筛选多一项。**不用改任何页面代码。**
+Save → a new card appears on home, a new type in the entry form, a new tab in stats, a new item in the list filter. **No page code changes needed.**
 
 ---
 
-## 数据说明
+## Data Notes
 
-- **默认**：全部记录存本机 `wx.setStorageSync`，key 为 `life_log_records_v1`，不上传服务器
-- 绿植档案存 `life_log_plants_v1`（同样本机优先）；开启 AI 识别后照片会上传到**你自己的**云开发环境
-- 开启云同步后：本地仍为工作副本，云端做备份与多设备共享，按 `updatedAt` 增量双向同步
-- 不收集手机号/位置/通讯录；照片仅用于品种识别（模型厂商处理），隐私指引需声明摄像头/相册用途
-- 「我的 → 导出全部记录」会把 JSON 复制到剪贴板，可粘贴到备忘录备份
-- 清理小程序缓存或卸载会清空本地数据；**未开云同步时换设备前务必先导出**
+- **Default**: all records stored locally via `wx.setStorageSync`, key `life_log_records_v1`, not uploaded to any server
+- Plant archives are stored under `life_log_plants_v1` (also local-first); after enabling AI recognition, photos are uploaded to **your own** cloud dev environment
+- After enabling cloud sync: local remains the working copy, cloud serves as backup + multi-device sharing, synced incrementally by `updatedAt`
+- No phone number / location / contacts collected; photos are used only for species recognition (processed by the model provider), the privacy guide must declare camera/album usage
+- "Me → Export all records" copies JSON to the clipboard, paste into a note app to back up
+- Clearing the Mini Program cache or uninstalling wipes local data; **always export before switching devices when cloud sync is off**
 
 ---
 
-## 当前版本
+## Current Version
 
-v0.3.0 —— 绿植养护上线（REQ-001）：拍照注册、AI 识别（智谱 GLM-4V-Flash / 阿里 qwen-vl）、24 种知识库兜底、养护建议与问题诊断；新增需求台账机制与 Node 单测。云同步（v0.2.0）不受影响。下一步：REQ-002 浇水提醒。
+v0.3.0 — Plant care shipped (REQ-001): photo registration, AI recognition (Zhipu GLM-4V-Flash / Alibaba qwen-vl), 24-species knowledge-base fallback, care advice and issue diagnosis; new requirement-ledger mechanism and Node unit tests. Cloud sync (v0.2.0) unaffected. Next: REQ-002 watering reminders.
