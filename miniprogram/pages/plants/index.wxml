@@ -1,0 +1,72 @@
+<view class="page">
+
+  <!-- 头部：注册入口 -->
+  <view class="hero">
+    <view class="hero-row">
+      <text class="hero-title">我的绿植</text>
+      <text class="hero-count">{{plants.length}} 盆</text>
+    </view>
+    <text class="hero-sub">{{aiReady ? '拍照自动识别品种，给出专属养护建议' : '未配置云开发：可正常建档，品种手动选择'}}</text>
+
+    <button class="photo-btn" bindtap="onTakePhoto">📷 拍照识别新绿植</button>
+
+    <view class="manual-pick" bindtap="onManualAdd">
+      <text>或手动选择品种添加 ›</text>
+    </view>
+  </view>
+
+  <!-- 档案列表 -->
+  <view class="section">
+    <view
+      class="plant-card"
+      wx:for="{{plants}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onOpen"
+      bindlongpress="onLongPress"
+      hover-class="plant-card-hover"
+      hover-stay-time="60"
+    >
+      <view class="plant-photo-wrap">
+        <image class="plant-photo" src="{{item.photoSrc}}" mode="aspectFill" binderror="onPhotoError" data-id="{{item.id}}" />
+        <view class="plant-photo-ph" wx:if="{{!item.photoSrc}}">{{item.emoji}}</view>
+      </view>
+      <view class="plant-main">
+        <view class="plant-name-row">
+          <text class="plant-name">{{item.name}}</text>
+          <text class="pill tone-{{item.tone}}">{{item.health}}</text>
+        </view>
+        <text class="plant-species">{{item.species || '未识别品种'}}</text>
+        <text class="plant-source">{{item.sourceLabel}}</text>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{!plants.length}}">
+      <view class="empty">
+        <text class="empty-icon">🪴</text>
+        <text class="empty-text">还没有绿植，拍一张开始养吧</text>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+<!-- 品种选择抽屉 -->
+<view class="sheet-mask" wx:if="{{sheetOpen}}" bindtap="onSheetClose"></view>
+<view class="sheet" wx:if="{{sheetOpen}}">
+  <view class="sheet-bar"></view>
+  <text class="sheet-title">选择品种</text>
+  <scroll-view class="sheet-list" scroll-y>
+    <view
+      class="sheet-item"
+      wx:for="{{speciesNames}}"
+      wx:key="*this"
+      data-name="{{item}}"
+      bindtap="onSheetPick"
+      hover-class="sheet-item-hover"
+      hover-stay-time="60"
+    >
+      {{item}}
+    </view>
+  </scroll-view>
+</view>

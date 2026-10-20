@@ -2,9 +2,16 @@
   "description": "日迹 - 个人生活记录助手",
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "node_modules" },
-      { "type": "file", "value": ".eslintrc.js" }
-    ]
+      {
+        "value": "node_modules",
+        "type": "folder"
+      },
+      {
+        "value": ".eslintrc.js",
+        "type": "file"
+      }
+    ],
+    "include": []
   },
   "setting": {
     "urlCheck": true,
@@ -18,12 +25,29 @@
     "checkInvalidKey": true,
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
-    "compileHotReLoad": true
+    "compileHotReLoad": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
   "compileType": "miniprogram",
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
   "appid": "wx8129269e01a22c8e",
   "projectname": "life-log",
-  "condition": {}
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
 }

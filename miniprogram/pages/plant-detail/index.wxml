@@ -1,0 +1,76 @@
+<view class="page" wx:if="{{loaded}}">
+
+  <!-- 照片 -->
+  <view class="photo-wrap">
+    <image wx:if="{{photoSrc}}" class="photo" src="{{photoSrc}}" mode="aspectFill" binderror="onPhotoError" />
+    <view class="photo-ph" wx:else>{{emoji}}</view>
+  </view>
+
+  <!-- 基本信息卡 -->
+  <view class="card head-card">
+    <view class="head-row">
+      <text class="name">{{name}}</text>
+      <text class="edit" bindtap="onRename">改名</text>
+    </view>
+    <view class="meta">
+      <text class="species">{{species}}</text>
+      <text class="tag">{{sourceLabel}}{{confidenceText ? ' · 置信度 ' + confidenceText : ''}}</text>
+    </view>
+    <view class="health-row">
+      <text class="pill tone-{{tone}}">{{health}}</text>
+      <picker
+        class="species-pick"
+        mode="selector"
+        range="{{speciesNames}}"
+        bindchange="onChangeSpecies"
+      >
+        <text>品种不对？换一个 ›</text>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 当前问题 -->
+  <view class="section" wx:if="{{issues.length}}">
+    <view class="section-head">
+      <text class="section-title">当前问题</text>
+    </view>
+    <view class="card">
+      <view class="issue" wx:for="{{issues}}" wx:key="title">
+        <text class="issue-title">⚠️ {{item.title}}</text>
+        <text class="issue-detail" wx:if="{{item.detail}}">{{item.detail}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 养护建议 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">养护建议</text>
+    </view>
+    <view class="card">
+      <view class="advice" wx:for="{{advice}}" wx:key="label">
+        <text class="advice-label">{{item.label}}</text>
+        <text class="advice-text">{{item.text}}</text>
+      </view>
+      <view wx:if="{{!advice.length}}" class="empty small">
+        <text class="empty-text">暂无建议：试试换个品种，或重新拍照识别</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 小贴士 -->
+  <view class="section" wx:if="{{tips.length}}">
+    <view class="section-head">
+      <text class="section-title">小贴士</text>
+    </view>
+    <view class="card">
+      <text class="tip" wx:for="{{tips}}" wx:key="*this">· {{item}}</text>
+    </view>
+  </view>
+
+  <!-- 删除 -->
+  <view class="section">
+    <button class="btn-danger" bindtap="onDelete">删除这盆植物</button>
+  </view>
+
+</view>

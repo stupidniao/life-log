@@ -4,7 +4,9 @@
     "pages/list/index",
     "pages/stats/index",
     "pages/mine/index",
-    "pages/record/index"
+    "pages/record/index",
+    "pages/plants/index",
+    "pages/plant-detail/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FFFFFF",

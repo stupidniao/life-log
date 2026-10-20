@@ -107,6 +107,10 @@ Page({
   },
 
   /** 导出：复制 JSON 到剪贴板（M1 最轻量的数据备份方式） */
+  onGoPlants() {
+    wx.navigateTo({ url: '/pages/plants/index' });
+  },
+
   onExport() {
     const records = recordService.activeRecords();
     if (!records.length) {
