@@ -9,7 +9,7 @@
  * 配置（云开发控制台 → 本函数 → 环境变量）：
  *   AI_PROVIDER  zhipu（默认）| dashscope
  *   AI_API_KEY   必填，模型厂商的 Key（智谱开放平台 / 阿里百炼）
- *   AI_MODEL     可选，覆盖默认模型（glm-4v-flash / qwen-vl-max）
+ *   AI_MODEL     可选，覆盖默认模型（glm-4v-flash / qwen3-vl-plus）
  *
  * 安全：Key 只存在环境变量，客户端只传云存储 fileID，图片不出云开发环境（下载后直连模型厂商）。
  */
@@ -70,9 +70,11 @@ exports.main = async (event) => {
   }
 
   try {
+    const t0 = Date.now();
     // 1. 从云存储取图（客户端不传图片二进制，避开 callFunction 1MB 限制）
     const dl = await cloud.downloadFile({ fileID: event.fileID });
     const base64 = dl.fileContent.toString('base64');
+    console.log('[plantAI] 下载图片', Date.now() - t0, 'ms, base64', base64.length, 'bytes');
     if (base64.length > MAX_BASE64) {
       return { code: 413, message: '图片过大，请靠近一点重拍' };
     }
@@ -80,19 +82,21 @@ exports.main = async (event) => {
     // 2. 调模型（OpenAI 兼容协议）
     const provider = analyze.resolveProvider(process.env.AI_PROVIDER);
     const model = process.env.AI_MODEL || provider.defaultModel;
+    const t1 = Date.now();
     const resp = await postJSON(
       provider.baseURL,
       {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + apiKey
       },
-      {
+      Object.assign({
         model: model,
         messages: analyze.buildMessages(base64),
-        temperature: 0.2,
-        max_tokens: 1200
-      }
+        temperature: 0.1,
+        max_tokens: 1024
+      }, provider.extraBody || {})
     );
+    console.log('[plantAI] 调模型', model, Date.now() - t1, 'ms');
 
     const choice = resp && resp.choices && resp.choices[0];
     const content = choice && choice.message && choice.message.content;
@@ -107,6 +111,7 @@ exports.main = async (event) => {
       return { code: 502, message: '模型返回格式异常，请重试' };
     }
 
+    console.log('[plantAI] 全程耗时', Date.now() - t0, 'ms');
     return {
       code: 0,
       data: analyze.normalizeAnalysis(parsed),

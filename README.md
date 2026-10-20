@@ -71,7 +71,7 @@ riji-life-log/
 
 1. In DevTools, right-click `cloudfunctions/plantAI` → **Upload and Deploy: Cloud Install Dependencies**
 2. Cloud dev console → cloud function plantAI → Config → environment variables: `AI_PROVIDER=zhipu`, `AI_API_KEY=<key from Zhipu open platform>` (free tier GLM-4V-Flash)
-3. To switch to Alibaba Bailian: `AI_PROVIDER=dashscope` + a Bailian key (default model qwen-vl-max)
+3. To switch to Alibaba Bailian: `AI_PROVIDER=dashscope` + a Bailian key (default model qwen3-vl-plus)
 
 Photos are only stored in your own cloud dev environment + the model provider; recognition failure automatically falls back to manual selection, so archive creation never breaks.
 

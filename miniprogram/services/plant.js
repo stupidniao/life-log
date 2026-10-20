@@ -149,11 +149,23 @@ function aiAvailable() {
 function compress(src) {
   return new Promise(function (resolve) {
     if (!wx.compressImage) return resolve(src);
+    // 关键：仅 quality 压不缩尺寸，手机照片几千万像素，base64 仍会上 MB。
+    // 用 compressedWidth/Height 把最长边压到 1280px（基础库 ≥2.26.0），模型识别足够。
     wx.compressImage({
       src: src,
       quality: 70,
+      compressedWidth: 1280,
+      compressedHeight: 1280,
       success: function (r) { resolve(r.tempFilePath); },
-      fail: function () { resolve(src); } // 压缩失败用原图，不阻断
+      fail: function () {
+        // 老基础库不支持尺寸参数时退回纯质量压缩
+        wx.compressImage({
+          src: src,
+          quality: 70,
+          success: function (r2) { resolve(r2.tempFilePath); },
+          fail: function () { resolve(src); }
+        });
+      }
     });
   });
 }
@@ -190,18 +202,34 @@ function uploadToCloud(src) {
  */
 async function analyzePhoto(tempFilePath) {
   const compressed = await compress(tempFilePath);
-  const localPath = await saveLocal(compressed);
-  const photo = { fileID: '', localPath: localPath };
+  const photo = { fileID: '', localPath: compressed };
 
   if (!aiAvailable() || !sync.ensureInit()) {
+    // 无云：先存本地副本，离线也能看照片
+    photo.localPath = await saveLocal(compressed) || compressed;
     return { photo: photo, analysis: null, reason: 'no-cloud' };
   }
 
   try {
-    photo.fileID = await uploadToCloud(compressed);
+    // 先上传云存储，再 saveFile 存档。顺序很关键：saveFile 会消耗临时文件，
+    // 若先 saveFile 再用临时路径 uploadFile 会报 createUploadTask:fail file not found
+    let fileID;
+    try {
+      fileID = await uploadToCloud(compressed);
+      photo.fileID = fileID;
+    } catch (upErr) {
+      console.error('[plant] 上传云存储失败', upErr);
+      // 上传失败也要留本地副本，用户仍可手动建档
+      photo.localPath = await saveLocal(compressed) || compressed;
+      return { photo: photo, analysis: null, reason: 'upload-failed', error: upErr };
+    }
+
+    // 上传成功后存本地持久副本（兜底显示）
+    photo.localPath = await saveLocal(compressed) || compressed;
+
     const res = await wx.cloud.callFunction({
       name: CLOUD_FUNCTION,
-      data: { action: 'analyze', fileID: photo.fileID }
+      data: { action: 'analyze', fileID: fileID }
     });
     const r = res && res.result;
     if (!r || r.code !== 0) {

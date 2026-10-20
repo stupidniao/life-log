@@ -82,8 +82,17 @@ Page({
 
       if (out.reason === 'ai-failed') {
         wx.showToast({ title: '识别失败，手动选个品种吧', icon: 'none' });
+      } else if (out.reason === 'upload-failed') {
+        // 上传云存储失败：多为云开发未开通/环境 ID 错误/存储未启用，给出可自查的提示
+        const msg = (out.error && out.error.errMsg) || '';
+        console.error('[plants] 上传失败详情', out.error);
+        wx.showModal({
+          title: '照片上传失败',
+          content: '已保留本地照片，可继续手动建档。\n若想用 AI 识别，请检查：①「我的→云同步」环境 ID 是否正确 ② 云开发是否已开通存储 ③ plantAI 云函数是否已部署。\n' + (msg ? '\n[' + msg + ']' : ''),
+          showCancel: false
+        });
       }
-      // 无云 / 识别失败：照片保留，品种走手选，诊断字段留空
+      // 无云 / 识别失败 / 上传失败：照片保留，品种走手选，诊断字段留空
       that.pendingPhoto = out.photo;
       that.pendingAnalysis = null;
       that.setData({ sheetOpen: true });

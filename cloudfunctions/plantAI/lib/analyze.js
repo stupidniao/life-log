@@ -30,11 +30,14 @@ const PROVIDERS = {
   // 两家都是 OpenAI 兼容的 chat/completions 协议，只差 baseURL 与默认模型
   zhipu: {
     baseURL: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-    defaultModel: 'glm-4v-flash'
+    defaultModel: 'glm-4v-flash',
+    extraBody: {}
   },
   dashscope: {
     baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-    defaultModel: 'qwen-vl-max'
+    defaultModel: 'qwen3-vl-plus',
+    // Qwen3 系列默认开启 thinking，简单识别任务会平白多花几秒；关掉直接出 JSON
+    extraBody: { enable_thinking: false }
   }
 };
 
