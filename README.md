@@ -135,4 +135,4 @@ Save → a new card appears on home, a new type in the entry form, a new tab in 
 
 ## Current Version
 
-v0.3.0 — Plant care shipped (REQ-001): photo registration, AI recognition (Zhipu GLM-4V-Flash / Alibaba qwen-vl), 24-species knowledge-base fallback, care advice and issue diagnosis; new requirement-ledger mechanism and Node unit tests. Cloud sync (v0.2.0) unaffected. Next: REQ-002 watering reminders.
+v0.4.0 — Plant recognition correction (REQ-004): correct a wrong AI species by entering the right name; the system re-queries all info by that name (with the original photo when available) and regenerates the full archive. Entry points: the registration species picker's custom-name option and the plant detail "change species" picker. Falls back to the local knowledge base when cloud/AI is unavailable. Cloud sync (v0.3.1) unaffected.

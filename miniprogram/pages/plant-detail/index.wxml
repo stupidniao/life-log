@@ -18,14 +18,7 @@
     </view>
     <view class="health-row">
       <text class="pill tone-{{tone}}">{{health}}</text>
-      <picker
-        class="species-pick"
-        mode="selector"
-        range="{{speciesNames}}"
-        bindchange="onChangeSpecies"
-      >
-        <text>品种不对？换一个 ›</text>
-      </picker>
+      <text class="species-pick" bindtap="onCorrectSpecies">识别不对？纠正品种 ›</text>
     </view>
   </view>
 

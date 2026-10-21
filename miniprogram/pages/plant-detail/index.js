@@ -2,12 +2,10 @@
  * 绿植详情（REQ-001）
  *
  * 展示：照片、名字/品种/来源/置信度、健康状态、当前问题、养护建议、小贴士。
- * 操作：改名、换品种（方案从知识库重算，AI 诊断保留）、删除。
+ * 操作：改名、纠正品种（自由输入正确名字，按名字重新查询方案，AI 诊断保留）、删除。
  */
 const plantService = require('../../services/plant');
 const plantCare = require('../../utils/plantCare');
-
-const CUSTOM_OPTION = '其他…';
 
 Page({
   data: {
@@ -23,15 +21,11 @@ Page({
     tone: 'muted',
     advice: [],
     issues: [],
-    tips: [],
-    speciesNames: []
+    tips: []
   },
 
   onLoad(options) {
     this.plantId = options.id || '';
-    this.setData({
-      speciesNames: plantCare.listNames().concat([CUSTOM_OPTION])
-    });
     this.refresh();
   },
 
@@ -107,29 +101,56 @@ Page({
     });
   },
 
-  onChangeSpecies(e) {
-    const idx = Number(e.detail.value);
-    const name = this.data.speciesNames[idx];
+  /** 纠错入口：自由输入正确品种名（不再弹品种列表） */
+  onCorrectSpecies() {
     const that = this;
-
-    if (name === CUSTOM_OPTION) {
-      wx.showModal({
-        title: '输入品种名',
-        editable: true,
-        placeholderText: '例如：空气凤梨',
-        success: function (m) {
-          if (m.confirm && m.content) that.applySpecies(m.content);
+    wx.showModal({
+      title: '识别不对？输入正确名字',
+      editable: true,
+      placeholderText: '输入正确的品种名，例如：龟背竹',
+      confirmText: '确定',
+      cancelText: '取消',
+      success: function (m) {
+        if (m.confirm && m.content && m.content.trim()) {
+          that.correctSpecies(m.content.trim());
+        } else if (m.confirm && !(m.content && m.content.trim())) {
+          wx.showToast({ title: '请输入名字', icon: 'none' });
         }
-      });
-      return;
-    }
-    this.applySpecies(name);
+      }
+    });
   },
 
-  applySpecies(speciesName) {
-    plantService.changeSpecies(this.plantId, speciesName);
-    this.refresh();
-    wx.showToast({ title: '方案已更新', icon: 'none' });
+  /**
+   * 纠错（REQ-004）：用户输入正确名字 → 按名字重新查询 → 原地重写档案。
+   * 有云端照片则带图纠错（校准健康/问题）；无云或失败回退本地知识库。
+   */
+  correctSpecies(correctedName) {
+    const that = this;
+    const p = plantService.get(this.plantId);
+    const photo = p && p.photo ? p.photo : null;
+
+    if (!plantService.aiAvailable()) {
+      // 无云：直接落到本地知识库（等价于旧的换品种，但用纠正名）
+      plantService.applyCorrection(this.plantId, null, correctedName);
+      that.refresh();
+      wx.showToast({ title: '已按新名字更新', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '正在查询…', mask: true });
+    plantService.analyzeCorrection(correctedName, photo).then(function (out) {
+      wx.hideLoading();
+      if (out.analysis) {
+        plantService.applyCorrection(that.plantId, out.analysis, correctedName);
+        that.refresh();
+        wx.showToast({ title: '档案已重新生成', icon: 'none' });
+      } else {
+        // 云查询失败：降级本地知识库，纠错仍生效
+        plantService.applyCorrection(that.plantId, null, correctedName);
+        that.refresh();
+        wx.showToast({ title: '已按新名字更新', icon: 'none' });
+      }
+    });
   },
 
   onDelete() {

@@ -11,6 +11,7 @@
 | REQ-001 | 2026-10-20 | Plant care · photo registration & care advice | Delivered | v0.3.0 | [REQ-001-plant-care-photo-registration-and-advice](requirements/REQ-001-plant-care-photo-registration-and-advice.md) |
 | REQ-002 | 2026-10-20 | Watering / sunlight due reminders | Shelved | — | [REQ-002-watering-and-sunlight-reminders](requirements/REQ-002-watering-and-sunlight-reminders.md) |
 | REQ-003 | 2026-10-20 | Plant archive cloud sync (cross-device, incl. photos) | Delivered | v0.3.1 | [REQ-003-plant-archive-cloud-sync](requirements/REQ-003-plant-archive-cloud-sync.md) |
+| REQ-004 | 2026-10-20 | Plant recognition correction (re-query by corrected name) | Delivered | v0.4.0 | [REQ-004-plant-recognition-correction](requirements/REQ-004-plant-recognition-correction.md) |
 
 ## Historical Requirements (backfilled)
 
@@ -30,3 +31,4 @@ This mechanism was established during v0.3.0 development; previously shipped fea
 | v0.2.0 | 2026-10-19 | REQ-000b |
 | v0.3.0 | 2026-10-20 | REQ-001 (53 unit tests green) |
 | v0.3.1 | 2026-10-20 | REQ-003 (plant archive cloud sync, 61 unit tests green) |
+| v0.4.0 | 2026-10-20 | REQ-004 (plant recognition correction, 69 unit tests green) |

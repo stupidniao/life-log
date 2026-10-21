@@ -108,17 +108,36 @@ Page({
       content: '看起来是「' + (a.species || '一盆绿植') + '」' +
         (conf ? '，置信度 ' + conf : '') + '。用它建档吗？',
       confirmText: '建档',
-      cancelText: '选别的',
+      cancelText: '名字不对',
       success: function (m) {
         if (m.confirm) {
           const p = plantService.createFromAnalysis(a, out.photo);
           that.refresh();
           wx.navigateTo({ url: '/pages/plant-detail/index?id=' + p.id });
         } else {
-          // 用户不认可识别结果：照片与 AI 诊断保留，品种换成手选
+          // 用户不认可识别结果：直接自由输入正确名字，走纠错查询
           that.pendingPhoto = out.photo;
           that.pendingAnalysis = a;
-          that.setData({ sheetOpen: true });
+          that.promptCorrectName();
+        }
+      }
+    });
+  },
+
+  /** 自由输入正确品种名（弹窗输入框），输入后走纠错查询 */
+  promptCorrectName() {
+    const that = this;
+    wx.showModal({
+      title: '正确的名字是？',
+      editable: true,
+      placeholderText: '输入正确的品种名，例如：龟背竹',
+      confirmText: '确定',
+      cancelText: '取消',
+      success: function (m) {
+        if (m.confirm && m.content && m.content.trim()) {
+          that.correctAndBuild(m.content.trim());
+        } else if (m.confirm && !(m.content && m.content.trim())) {
+          wx.showToast({ title: '请输入名字', icon: 'none' });
         }
       }
     });
@@ -142,18 +161,49 @@ Page({
 
     if (name === CUSTOM_OPTION) {
       wx.showModal({
-        title: '输入品种名',
+        title: '输入正确的品种名',
         editable: true,
         placeholderText: '例如：空气凤梨',
         success: function (m) {
           if (m.confirm && m.content && m.content.trim()) {
-            that.buildWith(m.content.trim());
+            that.correctAndBuild(m.content.trim());
           }
         }
       });
       return;
     }
     this.buildWith(name);
+  },
+
+  /**
+   * 自定义名称纠错建档（REQ-004）：用户给出正确名字 → 按名字重新查询（带刚拍的图）
+   * → 用纠错结果建档。无云/失败时回退手动建档（本地知识库）。
+   */
+  correctAndBuild(correctedName) {
+    const that = this;
+    const photo = this.pendingPhoto;
+
+    if (!plantService.aiAvailable()) {
+      this.buildWith(correctedName);
+      return;
+    }
+
+    wx.showLoading({ title: '正在查询…', mask: true });
+    plantService.analyzeCorrection(correctedName, photo).then(function (out) {
+      wx.hideLoading();
+      if (out.analysis) {
+        // 纠错成功：按纠正结果建档，照片沿用刚拍的
+        const p = plantService.createFromAnalysis(out.analysis, photo);
+        that.pendingPhoto = null;
+        that.pendingAnalysis = null;
+        that.setData({ sheetOpen: false });
+        that.refresh();
+        wx.navigateTo({ url: '/pages/plant-detail/index?id=' + p.id });
+      } else {
+        // 云查询失败：回退手动建档，纠正仍生效
+        that.buildWith(correctedName);
+      }
+    });
   },
 
   buildWith(speciesName) {

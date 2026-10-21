@@ -147,3 +147,62 @@ test('改品种：换成知识库品种后方案重算，健康与问题保留',
   eq(after.issues.length, 1, '问题列表保留');
   eq(after.source, 'library', '改品种后来源变知识库');
 });
+
+/* ---------------- 纠错重写（REQ-004） ---------------- */
+
+test('纠错：按新名字重写，保留 id/name/photo/createdAt', function () {
+  fresh();
+  const p = plantService.createFromAnalysis(
+    { species: '绿萝', confidence: 0.4, health: '需关注', care: {}, issues: [], tips: [] },
+    { fileID: 'cloud://x', localPath: 'wxfile://a' }
+  );
+  plantService.update(p.id, { name: '窗台那盆' });
+
+  const out = plantService.applyCorrection(p.id, {
+    species: '龟背竹', confidence: 0.9, health: '健康',
+    care: { light: '明亮散射光' }, issues: [{ title: '新问题', detail: '' }], tips: ['通风']
+  }, '龟背竹');
+
+  const after = plantService.get(p.id);
+  ok(out !== null);
+  eq(after.id, p.id, 'id 保留');
+  eq(after.name, '窗台那盆', '昵称保留');
+  eq(after.photo.fileID, 'cloud://x', '照片保留');
+  eq(after.createdAt, p.createdAt, 'createdAt 保留');
+  eq(after.species, '龟背竹', '品种替换');
+  eq(after.speciesKey, 'monstera');
+  eq(after.health, '健康', '健康诊断替换');
+  eq(after.confidence, 0.9);
+  eq(after.source, 'ai');
+  eq(after.issues.length, 1);
+});
+
+test('纠错：analysis 为 null 时走本地知识库兜底', function () {
+  fresh();
+  const p = plantService.createManual('绿萝', {});
+  plantService.update(p.id, { name: '我那盆' });
+
+  plantService.applyCorrection(p.id, null, '龟背竹');
+  const after = plantService.get(p.id);
+  eq(after.species, '龟背竹');
+  eq(after.speciesKey, 'monstera');
+  eq(after.source, 'library', '无云回退知识库');
+  eq(after.name, '我那盆', '昵称保留');
+  ok(after.care.light.length > 0, '方案来自知识库');
+});
+
+test('纠错：知识库也查不到的纠正名，用默认周期', function () {
+  fresh();
+  const p = plantService.createManual('绿萝', {});
+  plantService.applyCorrection(p.id, null, '某种罕见植物');
+  const after = plantService.get(p.id);
+  eq(after.species, '某种罕见植物');
+  eq(after.speciesKey, '');
+  eq(after.source, 'manual');
+  eq(after.care.waterDays, 7);
+});
+
+test('纠错：不存在的 id 返回 null，不崩', function () {
+  fresh();
+  eq(plantService.applyCorrection('p-nope', null, '绿萝'), null);
+});

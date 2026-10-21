@@ -142,6 +142,34 @@ function changeSpecies(id, speciesName) {
   });
 }
 
+/**
+ * 纠错：用纠正后的名字重新查询，原地重写档案（REQ-004）
+ * 保留 id / name（昵称，空则回落到品种名）/ photo / createdAt，
+ * 替换 species / 方案 / 健康 / 问题 / 贴士 / 置信度，来源置 ai。
+ * @param {string} id
+ * @param {object} analysis 云函数 correct 返回的归一化结果（可为 null，走知识库兜底）
+ * @param {string} correctedName 用户给的原始纠正名（analysis 缺失时兜底）
+ */
+function applyCorrection(id, analysis, correctedName) {
+  const cur = get(id);
+  if (!cur) return null;
+  const a = analysis || {};
+  const speciesName = a.species || correctedName || cur.species;
+  const entry = plantCare.findByName(speciesName);
+  return update(id, {
+    name: cur.name || speciesName,
+    species: speciesName,
+    speciesKey: entry ? entry.key : '',
+    emoji: entry ? entry.emoji : '🪴',
+    care: plantCare.normalizeCare(a.care, entry),
+    health: a.health || '',
+    issues: plantCare.normalizeIssues(a.issues),
+    tips: plantCare.normalizeTips(a.tips),
+    confidence: analysis ? Number(a.confidence) || 0 : 0,
+    source: analysis ? 'ai' : (entry ? 'library' : 'manual')
+  });
+}
+
 /* ---------------- 拍照识别流程 ---------------- */
 
 /** 云识别可用：填了环境 ID 且运行环境支持 wx.cloud */
@@ -245,6 +273,34 @@ async function analyzePhoto(tempFilePath) {
   }
 }
 
+/**
+ * 纠错查询主流程（REQ-004）
+ * @param {string} correctedName 用户纠正的品种名
+ * @param {{fileID?:string, localPath?:string}|null} photo 归档照片；有 fileID 则带图纠错
+ * @returns {Promise<{analysis:object|null, reason?:string}>}
+ *   任何失败都不 reject，降级 analysis: null，由页面回退本地知识库
+ */
+async function analyzeCorrection(correctedName, photo) {
+  if (!aiAvailable() || !sync.ensureInit()) {
+    return { analysis: null, reason: 'no-cloud' };
+  }
+  const fileID = photo && photo.fileID ? photo.fileID : '';
+  try {
+    const res = await wx.cloud.callFunction({
+      name: CLOUD_FUNCTION,
+      data: { action: 'correct', correctedName: correctedName, fileID: fileID }
+    });
+    const r = res && res.result;
+    if (!r || r.code !== 0) {
+      throw new Error((r && r.message) || '云函数返回异常');
+    }
+    return { analysis: r.data, provider: r.provider, model: r.model };
+  } catch (err) {
+    console.error('[plant] 纠错查询失败', err);
+    return { analysis: null, reason: 'ai-failed', error: err };
+  }
+}
+
 module.exports = {
   list,
   get,
@@ -254,6 +310,8 @@ module.exports = {
   createManual,
   createFromAnalysis,
   changeSpecies,
+  applyCorrection,
   aiAvailable,
-  analyzePhoto
+  analyzePhoto,
+  analyzeCorrection
 };

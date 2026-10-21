@@ -124,6 +124,37 @@ test('组装：system 提示词覆盖全部字段字典', function () {
   });
 });
 
+/* ---------------- 纠错请求组装（REQ-004） ---------------- */
+
+test('纠错组装：system 用名字锚定，含纠正名', function () {
+  const msgs = analyze.buildCorrectionMessages('QUJD', '龟背竹');
+  eq(msgs.length, 2);
+  eq(msgs[0].role, 'system');
+  ok(msgs[0].content.indexOf('龟背竹') > -1, 'system 应包含纠正名');
+  ok(msgs[0].content.indexOf('JSON') > -1, 'system 应强调只返回 JSON');
+});
+
+test('纠错组装：带图时 user 含图像 part', function () {
+  const msgs = analyze.buildCorrectionMessages('QUJD', '绿萝');
+  const img = msgs[1].content.filter(function (p) { return p.type === 'image_url'; })[0];
+  ok(img, '应包含图像 part');
+  eq(img.image_url.url, 'data:image/jpeg;base64,QUJD');
+});
+
+test('纠错组装：无图时纯文本，无图像 part', function () {
+  const msgs = analyze.buildCorrectionMessages(null, '绿萝');
+  eq(msgs[1].content.length, 1, '只有文本');
+  eq(msgs[1].content[0].type, 'text');
+  const hasImg = msgs[1].content.some(function (p) { return p.type === 'image_url'; });
+  eq(hasImg, false);
+});
+
+test('纠错组装：空串 base64 同样降级为纯文本', function () {
+  const msgs = analyze.buildCorrectionMessages('', '绿萝');
+  const hasImg = msgs[1].content.some(function (p) { return p.type === 'image_url'; });
+  eq(hasImg, false);
+});
+
 /* ---------------- Provider 配置 ---------------- */
 
 test('Provider：默认智谱，两家配置齐全', function () {

@@ -26,6 +26,35 @@ const PROMPT = [
   '注意：看不准的字段给空值，不要编造；issues 没有问题就给空数组。'
 ].join('\n');
 
+/** 纠错提示词模板：把用户给的名字当作权威方向，确认品种并补全完整养护方案 */
+function buildCorrectionPrompt(correctedName) {
+  return [
+    '你是资深室内绿植养护专家。',
+    '用户在纠正一次识别错误：他认为这盆植物是「' + correctedName + '」。',
+    '请以这个名字为权威方向，确认它对应的准确品种（可能是该名字的同义词、别称或更规范的学名），',
+    '并给出该品种完整的养护建议。',
+    '只返回一个 JSON 对象，不要 markdown 围栏，不要任何多余文字。字段如下：',
+    '{',
+    '  "species": "确认后的准确品种中文名（可带拉丁学名）",',
+    '  "confidence": 0到1的小数，你对该名字指向品种的把握度",',
+    '  "health": "健康状态，只能是：健康 | 一般 | 需关注",',
+    '  "care": {',
+    '    "light": "光照需求，一句话",',
+    '    "water": "浇水方法，一句话",',
+    '    "waterDays": 浇水间隔天数，整数,',
+    '    "temp": "适宜温度",',
+    '    "humidity": "湿度需求",',
+    '    "fertilizer": "施肥建议",',
+    '    "soil": "土壤建议",',
+    '    "toxicity": "毒性提示，只写避免误食类提醒，不写药用价值"',
+    '  },',
+    '  "issues": [{ "title": "从照片观察到的问题", "detail": "原因与处理建议" }],',
+    '  "tips": ["一两句额外的养护提醒"]',
+    '}',
+    '注意：看不准的字段给空值，不要编造；没有照片时 issues 给空数组。'
+  ].join('\n');
+}
+
 const PROVIDERS = {
   // 两家都是 OpenAI 兼容的 chat/completions 协议，只差 baseURL 与默认模型
   zhipu: {
@@ -57,6 +86,23 @@ function buildMessages(base64) {
         { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + base64 } }
       ]
     }
+  ];
+}
+
+/**
+ * 纠错请求组装：名字锚定的 system 提示词 + 可选图像。
+ * base64 传 null/空串时降级为纯文本查询（无照片也能纠错）。
+ */
+function buildCorrectionMessages(base64, correctedName) {
+  const content = [
+    { type: 'text', text: '用户认为这盆植物是「' + correctedName + '」，请确认品种并给出养护建议。' }
+  ];
+  if (base64) {
+    content.push({ type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + base64 } });
+  }
+  return [
+    { role: 'system', content: buildCorrectionPrompt(correctedName) },
+    { role: 'user', content: content }
   ];
 }
 
@@ -162,6 +208,7 @@ module.exports = {
   PROVIDERS,
   resolveProvider,
   buildMessages,
+  buildCorrectionMessages,
   parseModelJson,
   normalizeAnalysis
 };

@@ -3,8 +3,12 @@
  *
  * 协议：
  *   入参 { action: 'analyze', fileID: 'cloud://...' }
+ *        { action: 'correct', correctedName: '绿萝', fileID?: 'cloud://...' }
  *   出参 { code: 0, data: {species, confidence, health, care, issues, tips}, provider, model }
  *        { code: 4xx/5xx, message }
+ *
+ * correct 说明（REQ-004）：用户纠正识别错误后，按新名字重新查询完整养护方案；
+ * fileID 可选，带照片时模型可结合图像校准健康状态与问题诊断，不带则纯文本查询。
  *
  * 配置（云开发控制台 → 本函数 → 环境变量）：
  *   AI_PROVIDER  zhipu（默认）| dashscope
@@ -57,10 +61,14 @@ function postJSON(url, headers, body) {
 }
 
 exports.main = async (event) => {
-  if (!event || event.action !== 'analyze') {
+  const action = event && event.action;
+  if (action !== 'analyze' && action !== 'correct') {
     return { code: 400, message: '未知 action' };
   }
-  if (!event.fileID) {
+  if (action === 'correct' && !event.correctedName) {
+    return { code: 400, message: '缺少 correctedName' };
+  }
+  if (action === 'analyze' && !event.fileID) {
     return { code: 400, message: '缺少 fileID' };
   }
 
@@ -72,16 +80,23 @@ exports.main = async (event) => {
   try {
     const t0 = Date.now();
     // 1. 从云存储取图（客户端不传图片二进制，避开 callFunction 1MB 限制）
-    const dl = await cloud.downloadFile({ fileID: event.fileID });
-    const base64 = dl.fileContent.toString('base64');
-    console.log('[plantAI] 下载图片', Date.now() - t0, 'ms, base64', base64.length, 'bytes');
-    if (base64.length > MAX_BASE64) {
-      return { code: 413, message: '图片过大，请靠近一点重拍' };
+    //    correct 动作下 fileID 可选：没照片也能按名字纯文本纠错
+    let base64 = null;
+    if (event.fileID) {
+      const dl = await cloud.downloadFile({ fileID: event.fileID });
+      base64 = dl.fileContent.toString('base64');
+      console.log('[plantAI] 下载图片', Date.now() - t0, 'ms, base64', base64.length, 'bytes');
+      if (base64.length > MAX_BASE64) {
+        return { code: 413, message: '图片过大，请靠近一点重拍' };
+      }
     }
 
     // 2. 调模型（OpenAI 兼容协议）
     const provider = analyze.resolveProvider(process.env.AI_PROVIDER);
     const model = process.env.AI_MODEL || provider.defaultModel;
+    const messages = action === 'correct'
+      ? analyze.buildCorrectionMessages(base64, event.correctedName)
+      : analyze.buildMessages(base64);
     const t1 = Date.now();
     const resp = await postJSON(
       provider.baseURL,
@@ -91,7 +106,7 @@ exports.main = async (event) => {
       },
       Object.assign({
         model: model,
-        messages: analyze.buildMessages(base64),
+        messages: messages,
         temperature: 0.1,
         max_tokens: 1024
       }, provider.extraBody || {})
